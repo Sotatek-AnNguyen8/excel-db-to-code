@@ -80,7 +80,8 @@ public class ExcelDbObject
                         // Additional
                         { "HasMaxLength", f is { Type: ExcelDbEntityFieldType.Varchar, Length: > 0 } },
                         { "IsRequired", f.IsNullable },
-                        { "HasDefaultValue", f is { Type: ExcelDbEntityFieldType.Varchar, IsNullable: true } }
+                        { "HasDefaultValue", f is { Type: ExcelDbEntityFieldType.Varchar, IsNullable: true } },
+                        { "Validation", GetValidation(f) }
                     })
             },
             {
@@ -177,7 +178,7 @@ public class ExcelDbObject
             var description = row.Cell(_cDescription).Value.GetText();
             var isPrimaryKey = !row.Cell(_cPrimaryKey).Value.IsBlank;
             var isLookup = !row.Cell(_cLookup).Value.IsBlank;
-            var isNullable = !row.Cell(_cNullable).Value.IsBlank;
+            var isNullable = row.Cell(_cNullable).Value.IsBlank;
             dynamic defaultValue = cDefaultValueValue.IsBlank
                 ? string.Empty
                 : cDefaultValueValue.IsText
@@ -230,5 +231,39 @@ public class ExcelDbObject
             ExcelDbEntityFieldType.DateTime => "DateTime",
             _ => throw new Exception($"Unhandled type: {type}")
         };
+    }
+
+    private static string? GetValidation(ExcelDbEntityField field)
+    {
+        List<string> validations = [];
+
+        if (!field.IsNullable)
+        {
+            validations.Add("NotEmpty()");
+        }
+
+        switch (field.Type)
+        {
+            case ExcelDbEntityFieldType.Varchar:
+                if (field.Length is > 0)
+                {
+                    validations.Add($"MaximumLength({field.Length})");
+                }
+
+                break;
+            case ExcelDbEntityFieldType.Number:
+            case ExcelDbEntityFieldType.Timestamp:
+            case ExcelDbEntityFieldType.DateTime:
+            default:
+                break;
+        }
+
+        if (validations.Count == 0)
+        {
+            return null;
+        }
+
+        return $"{new string(' ', 8)}validator.RuleFor(x => x.{field.Name})" +
+               string.Join("", validations.Select(v => $"\n{new string(' ', 12)}.{v}")) + ";";
     }
 }

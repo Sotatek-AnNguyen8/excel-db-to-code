@@ -148,33 +148,46 @@ public class ExcelToDbScript(IConfiguration config)
 
     private async Task RenderCqrs(Dictionary<string, object> objDict)
     {
-        var stubble = new StubbleBuilder().Build();
-        string template;
-
-        using (var sr =
-            new StreamReader(
-                Path.Combine(Directory.GetCurrentDirectory(), @"Templates\ExcelToDb\GetByIdQuery.mustache"),
-                Encoding.UTF8))
-        {
-            template = await sr.ReadToEndAsync();
-        }
-
-        var output = RemoveRedundantLines(await stubble.RenderAsync(template,
-            new
-            {
-                Entity = objDict,
-                EntityNamespace = config["Generated:Entity:Namespace"],
-                DtoNamespace = config["Generated:Dto:Namespace"],
-                CqrsNamespace = config["Generated:Cqrs:Namespace"]
-            }));
-
         var name = objDict.GetValueOrDefault("Name");
-        var folderPath = Path.Combine(_pathGeneration, $@"Cqrs\{name}\Queries", $"Get{name}ByIdQuery.cs");
-        new FileInfo(folderPath).Directory?.Create(); // If the directory already exists, this method does nothing.
-
-        await using (var sw = new StreamWriter(folderPath, !File.Exists(folderPath)))
+        var view = new
         {
-            await sw.WriteLineAsync(output);
+            Entity = objDict,
+            EntityNamespace = config["Generated:Entity:Namespace"],
+            DtoNamespace = config["Generated:Dto:Namespace"],
+            CqrsNamespace = config["Generated:Cqrs:Namespace"],
+            ValidationNamespace = config["Generated:Validation:Namespace"],
+        };
+
+        // Template name, output folder name, output file name
+        List<Tuple<string, string, string>> taskList =
+        [
+            Tuple.Create("GetByIdQuery", $@"Cqrs\{name}\Queries", $"Get{name}ByIdQuery.cs"),
+            Tuple.Create("Validation", $@"Cqrs\{name}", $"{name}ValidationRules.cs"),
+        ];
+
+        var stubble = new StubbleBuilder().Build();
+
+        foreach (var task in taskList)
+        {
+            string template;
+
+            using (var sr =
+                new StreamReader(
+                    Path.Combine(Directory.GetCurrentDirectory(), $@"Templates\ExcelToDb\{task.Item1}.mustache"),
+                    Encoding.UTF8))
+            {
+                template = await sr.ReadToEndAsync();
+            }
+
+            var output = RemoveRedundantLines(await stubble.RenderAsync(template, view));
+
+            var folderPath = Path.Combine(_pathGeneration, task.Item2, task.Item3);
+            new FileInfo(folderPath).Directory?.Create(); // If the directory already exists, this method does nothing.
+
+            await using (var sw = new StreamWriter(folderPath, !File.Exists(folderPath)))
+            {
+                await sw.WriteLineAsync(output);
+            }
         }
     }
 
@@ -182,7 +195,7 @@ public class ExcelToDbScript(IConfiguration config)
     {
         str = new Regex(@"\{\r\n\s*\[").Replace(str, "{\r\n    [");
 
-        var emptyLineFromAttributesRegex = new Regex(@"\]\r\n\s*\r\n"); 
+        var emptyLineFromAttributesRegex = new Regex(@"\]\r\n\s*\r\n");
         var m = emptyLineFromAttributesRegex.Match(str);
 
         while (m.Success)
@@ -191,9 +204,9 @@ public class ExcelToDbScript(IConfiguration config)
             m = emptyLineFromAttributesRegex.Match(str);
         }
 
-        var emptyLineFromFieldsRegex = new Regex(@"\r\n\r\n *\r\n *\["); 
+        var emptyLineFromFieldsRegex = new Regex(@"\r\n\r\n *\r\n *\[");
         m = emptyLineFromFieldsRegex.Match(str);
-        
+
         while (m.Success)
         {
             str = emptyLineFromFieldsRegex.Replace(str, "\r\n\r\n    [");

@@ -1,0 +1,15 @@
+using FluentValidation;
+using {{EntityNamespace}};
+
+namespace {{ValidationNamespace}}.{{#Entity}}{{Name}}{{/Entity}};
+
+{{#Entity}}
+public class {{Name}}Validator : AbstractValidator<{{Name}}>
+{
+    public static void ApplyRules<T>(AbstractValidator<T> validator) where T : I{{Name}}Command
+    {
+{{#EntityFields}}
+{{{Validation}}}
+{{/EntityFields}}
+    }
+}{{/Entity}}
