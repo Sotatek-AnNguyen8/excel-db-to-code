@@ -58,6 +58,7 @@ public class ExcelDbObject
         return new Dictionary<string, object>
         {
             { "Name", Name },
+            { "VarName", char.ToLower(Name[0]) + Name[1..] },
             {
                 "EntityFields", entityFields
                     .Select(f => new Dictionary<string, object?>

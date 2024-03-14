@@ -9,7 +9,7 @@ The Excel-db-to-code Generator is a command-line tool designed to assist develop
     - [x] Dtos
     - [ ] Basic CQRS
       - [ ] Get by condition
-      - [ ] Get by ID
+      - [x] Get by ID
       - [ ] Create
       - [ ] Update
       - [ ] Delete

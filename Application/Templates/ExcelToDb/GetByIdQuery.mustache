@@ -1,0 +1,28 @@
+using Application.Common.Persistence;
+using {{DtoNamespace}};
+using {{EntityNamespace}};
+using Mapster;
+using MediatR;
+
+namespace {{CqrsNamespace}}.{{#Entity}}{{Name}}{{/Entity}}.Queries;
+
+{{#Entity}}
+public class Get{{Name}}ByIdQuery : IRequest<ResponseBase<{{Name}}Dto>>
+{
+    public DefaultIdType Id { get; init; }
+}
+
+public class Get{{Name}}ByIdQueryHandler(IRepository<{{Name}}> {{VarName}}Repository) : IRequestHandler<Get{{Name}}ByIdQuery, ResponseBase<{{Name}}Dto>>
+{
+    public async Task<ResponseBase<{{Name}}Dto>> Handle(Get{{Name}}ByIdQuery request, CancellationToken cancellationToken)
+    {
+        var {{VarName}} = await {{VarName}}Repository.GetByIdAsync(request.Id, cancellationToken);
+        var {{VarName}}Dto = category.Adapt<{{Name}}Dto>();
+        
+        return new ResponseBase<{{Name}}Dto>
+        {
+            Result = {{varName}}Dto,
+            Success = true
+        };
+    }
+}{{/Entity}}

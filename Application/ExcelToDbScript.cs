@@ -73,6 +73,7 @@ public class ExcelToDbScript(IConfiguration config)
 
         await RenderEntity(objDict);
         await RenderDto(objDict);
+        await RenderCqrs(objDict);
     }
 
     private async Task RenderEntity(Dictionary<string, object> objDict)
@@ -137,6 +138,38 @@ public class ExcelToDbScript(IConfiguration config)
             }));
 
         var folderPath = Path.Combine(_pathGeneration, "Dtos", $"{objDict.GetValueOrDefault("Name")}Dto.cs");
+        new FileInfo(folderPath).Directory?.Create(); // If the directory already exists, this method does nothing.
+
+        await using (var sw = new StreamWriter(folderPath, !File.Exists(folderPath)))
+        {
+            await sw.WriteLineAsync(output);
+        }
+    }
+
+    private async Task RenderCqrs(Dictionary<string, object> objDict)
+    {
+        var stubble = new StubbleBuilder().Build();
+        string template;
+
+        using (var sr =
+            new StreamReader(
+                Path.Combine(Directory.GetCurrentDirectory(), @"Templates\ExcelToDb\GetByIdQuery.mustache"),
+                Encoding.UTF8))
+        {
+            template = await sr.ReadToEndAsync();
+        }
+
+        var output = RemoveRedundantLines(await stubble.RenderAsync(template,
+            new
+            {
+                Entity = objDict,
+                EntityNamespace = config["Generated:Entity:Namespace"],
+                DtoNamespace = config["Generated:Dto:Namespace"],
+                CqrsNamespace = config["Generated:Cqrs:Namespace"]
+            }));
+
+        var name = objDict.GetValueOrDefault("Name");
+        var folderPath = Path.Combine(_pathGeneration, $@"Cqrs\{name}\Queries", $"Get{name}ByIdQuery.cs");
         new FileInfo(folderPath).Directory?.Create(); // If the directory already exists, this method does nothing.
 
         await using (var sw = new StreamWriter(folderPath, !File.Exists(folderPath)))
