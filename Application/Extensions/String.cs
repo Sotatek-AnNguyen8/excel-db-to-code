@@ -6,4 +6,9 @@ public static class StringExtension
     {
         return (T)Enum.Parse(typeof(T), value, true);
     }
+
+    public static string ToVariableCase(this string value)
+    {
+        return char.ToLower(value[0]) + value[1..];
+    }
 }

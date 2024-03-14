@@ -58,7 +58,7 @@ public class ExcelDbObject
         return new Dictionary<string, object>
         {
             { "Name", Name },
-            { "VarName", char.ToLower(Name[0]) + Name[1..] },
+            { "VarName", Name.ToVariableCase() },
             {
                 "EntityFields", entityFields
                     .Select(f => new Dictionary<string, object?>
@@ -81,7 +81,7 @@ public class ExcelDbObject
                         { "HasMaxLength", f is { Type: ExcelDbEntityFieldType.Varchar, Length: > 0 } },
                         { "IsRequired", f.IsNullable },
                         { "HasDefaultValue", f is { Type: ExcelDbEntityFieldType.Varchar, IsNullable: true } },
-                        { "Validation", GetValidation(f) }
+                        { "Validation", GetValidation(f) },
                     })
             },
             {
@@ -109,16 +109,27 @@ public class ExcelDbObject
                     })
             },
             // Additional
+            { "ParamValidation", string.Join("\n", entityFields.Select(GetParamValidation)) },
             {
                 "Arguments",
                 string.Join(", ",
-                    entityFields.Select(f => $"{GetType(f.Type)} {char.ToLower(f.Name[0]) + f.Name[1..]}"))
+                    entityFields.Select(f => $"{GetType(f.Type)} {f.Name.ToVariableCase()}"))
+            },
+            {
+                "NullableArguments",
+                string.Join(", ",
+                    entityFields.Select(f => $"{GetType(f.Type)}? {f.Name.ToVariableCase()}"))
+            },
+            {
+                "Params",
+                string.Join(", ",
+                    entityFields.Select(f => $"request.{f.Name}"))
             },
             {
                 "Assignments",
                 string.Join("\n",
                     entityFields.Select(
-                        f => $"{new string(' ', 8)}{f.Name} = {char.ToLower(f.Name[0]) + f.Name[1..]};"))
+                        f => $"{new string(' ', 8)}{f.Name} = {f.Name.ToVariableCase()};"))
             }
         };
     }
@@ -159,7 +170,7 @@ public class ExcelDbObject
         return string.Join("", ws.Cell(_entityNamePos.Item1, _entityNamePos.Item2)
             .GetText()
             .Split(' ')
-            .Select((str, idx) => idx == 0 ? str : char.ToLower(str[0]) + str[1..]));
+            .Select((str, idx) => idx == 0 ? str : str.ToVariableCase()));
     }
 
     private static List<ExcelDbEntityField> GetFields(IXLWorksheet ws)
@@ -265,5 +276,28 @@ public class ExcelDbObject
 
         return $"{new string(' ', 8)}validator.RuleFor(x => x.{field.Name})" +
                string.Join("", validations.Select(v => $"\n{new string(' ', 12)}.{v}")) + ";";
+    }
+
+    private static string GetParamValidation(ExcelDbEntityField field)
+    {
+        var varName = field.Name.ToVariableCase();
+        var varAbbr = varName[0];
+
+        if (field.Type == ExcelDbEntityFieldType.Varchar)
+        {
+            return $$"""
+                             if (!string.IsNullOrEmpty({{field.Name}}))
+                             {
+                                 Query.Where({{varAbbr}} => {{varAbbr}}.{{field.Name}}.Contains({{varName}}));
+                             }
+                     """;
+        }
+
+        return $$"""
+                         if (status != null)
+                         {
+                             Query.Where({{varAbbr}} => {{varAbbr}}.{{field.Name}}.Contains({{varName}}));
+                         }
+                 """;
     }
 }

@@ -1,0 +1,45 @@
+using Application.Common.Models;
+using Application.Common.Persistence;
+using Application.Common.Responses;
+using {{DtoNamespace}};
+using Ardalis.Specification;
+using Domain.Common;
+using {{EntityNamespace}};
+using MediatR;
+
+namespace {{CqrsNamespace}}.{{#Entity}}{{Name}}{{/Entity}}.Queries;
+
+{{#Entity}}
+public class Search{{Name}}Param : PaginationFilter
+{
+{{#EntityFields}}
+    public {{Type}}? {{Name}} { get; init; }
+{{/EntityFields}}
+}
+
+public class Get{{Name}}ByConditionQueryHandler : Search{{Name}}Param, IRequest<ResponseBase<PaginationResponse<{{Name}}Dto>>>;
+
+public sealed class {{Name}}Spec : Specification<{{Name}}, {{Name}}Dto>, ISingleResultSpecification<{{Name}}>
+{
+    public {{Name}}Spec({{NullableArguments}})
+    {
+{{{ParamValidation}}}
+    }
+}
+
+public class Get{{Name}}ByConditionQueryHandler(IRepository<{{Name}}> {{VarName}}Repository) : IRequestHandler<Get{{Name}}ByIdQuery, ResponseBase<PaginationResponse<{{Name}}Dto>>
+{
+    public async Task<ResponseBase<{{Name}}Dto>> Handle(Get{{Name}}ByIdQuery request, CancellationToken cancellationToken)
+    {
+        var spec = new {{Name}}Spec({{Params}});
+
+        var response = new ResponseBase<PaginationResponse<{{Name}}Dto>>
+        {
+            Result = await {{VarName}}Repository
+                .PaginatedListAsync(spec, request.PageNumber, request.PageSize, cancellationToken),
+            Success = true
+        };
+
+        return response;
+    }
+}{{/Entity}}

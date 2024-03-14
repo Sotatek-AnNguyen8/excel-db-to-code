@@ -162,6 +162,7 @@ public class ExcelToDbScript(IConfiguration config)
         List<Tuple<string, string, string>> taskList =
         [
             Tuple.Create("GetByIdQuery", $@"Cqrs\{name}\Queries", $"Get{name}ByIdQuery.cs"),
+            Tuple.Create("GetByConditionQuery", $@"Cqrs\{name}\Queries", $"Get{name}ByConditionQuery.cs"),
             Tuple.Create("Validation", $@"Cqrs\{name}", $"{name}ValidationRules.cs"),
         ];
 
