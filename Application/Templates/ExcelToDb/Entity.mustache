@@ -1,0 +1,19 @@
+using Domain.Common.Contracts;
+using System.ComponentModel.DataAnnotations;
+using Domain.Common;
+
+namespace {{EntityNamespace}};
+
+{{#Entity}}
+public class {{Name}} : AuditableEntity, IAggregateRoot
+{
+{{#Fields}}
+    {{! Attributes }}
+    {{#HasMaxLength}}[MaxLength({{MaxLength}})]{{/HasMaxLength}}
+    {{#IsRequired}}[Required]{{/IsRequired}}
+    public {{Type}}{{^IsRequired}}?{{/IsRequired}} {{Name}} { get; set; }{{#HasDefaultValue}} = {{DefaultValue}};{{/HasDefaultValue}}
+
+{{/Fields}}
+{{> Update }}
+}
+{{/Entity}}
