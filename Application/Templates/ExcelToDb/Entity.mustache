@@ -7,13 +7,12 @@ namespace {{EntityNamespace}};
 {{#Entity}}
 public class {{Name}} : AuditableEntity, IAggregateRoot
 {
-{{#Fields}}
+{{#EntityFields}}
     {{! Attributes }}
     {{#HasMaxLength}}[MaxLength({{MaxLength}})]{{/HasMaxLength}}
     {{#IsRequired}}[Required]{{/IsRequired}}
     public {{Type}}{{^IsRequired}}?{{/IsRequired}} {{Name}} { get; set; }{{#HasDefaultValue}} = {{DefaultValue}};{{/HasDefaultValue}}
 
-{{/Fields}}
+{{/EntityFields}}
 {{> Update }}
-}
-{{/Entity}}
+}{{/Entity}}

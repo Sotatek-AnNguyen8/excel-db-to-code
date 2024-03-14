@@ -36,25 +36,30 @@ public class ExcelDbObject
     private static int _cDefaultValue;
     private static int _cType;
     private static int _cLength;
-    private static IEnumerable<string?> _skippedFields = [];
+    private static IEnumerable<string?> _skippedEntityFields = [];
+    private static IEnumerable<string?> _skippedDtoFields = [];
+    private static Dictionary<string, string?> _mappingDtoFields = new();
 
     // <Row, Column>
     private static Tuple<int, int> _entityNamePos = null!;
 
-    public string Name { get; private init; } = null!;
+    private string Name { get; init; } = null!;
     private List<ExcelDbEntityField> Fields { get; init; } = [];
 
     public Dictionary<string, object> ToDictionary()
     {
-        var displayFields = Fields
-            .Where(f => !_skippedFields.Contains(f.Name))
+        var entityFields = Fields
+            .Where(f => !_skippedEntityFields.Contains(f.Name))
+            .ToList();
+        var dtoFields = Fields
+            .Where(f => !_skippedDtoFields.Contains(f.Name))
             .ToList();
 
         return new Dictionary<string, object>
         {
             { "Name", Name },
             {
-                "Fields", displayFields
+                "EntityFields", entityFields
                     .Select(f => new Dictionary<string, object?>
                     {
                         { "Index", f.Index },
@@ -77,16 +82,40 @@ public class ExcelDbObject
                         { "HasDefaultValue", f is { Type: ExcelDbEntityFieldType.Varchar, IsNullable: true } }
                     })
             },
+            {
+                "DtoFields", dtoFields
+                    .Select(f => new Dictionary<string, object?>
+                    {
+                        { "Index", f.Index },
+                        { "Name", _mappingDtoFields.TryGetValue(f.Name, out var field) ? field : f.Name },
+                        { "Description", f.Description },
+                        { "PrimaryKey", f.IsPrimaryKey },
+                        { "Lookup", f.IsLookup },
+                        { "Nullable", f.IsNullable },
+                        {
+                            "DefaultValue",
+                            f.DefaultValue is string
+                                ? string.IsNullOrEmpty(f.DefaultValue) ? "string.Empty" : $"\"{f.DefaultValue}\""
+                                : f.DefaultValue
+                        },
+                        { "Type", GetType(f.Type) },
+                        { "MaxLength", f.Length },
+                        // Additional
+                        { "HasMaxLength", f is { Type: ExcelDbEntityFieldType.Varchar, Length: > 0 } },
+                        { "IsRequired", f.IsNullable },
+                        { "HasDefaultValue", f is { Type: ExcelDbEntityFieldType.Varchar, IsNullable: true } }
+                    })
+            },
             // Additional
             {
                 "Arguments",
                 string.Join(", ",
-                    displayFields.Select(f => $"{GetType(f.Type)} {char.ToLower(f.Name[0]) + f.Name[1..]}"))
+                    entityFields.Select(f => $"{GetType(f.Type)} {char.ToLower(f.Name[0]) + f.Name[1..]}"))
             },
             {
                 "Assignments",
                 string.Join("\n",
-                    displayFields.Select(
+                    entityFields.Select(
                         f => $"{new string(' ', 8)}{f.Name} = {char.ToLower(f.Name[0]) + f.Name[1..]};"))
             }
         };
@@ -105,7 +134,11 @@ public class ExcelDbObject
         _cLength = int.Parse(configuration["Source:Columns:Length"] ?? "-1");
         _entityNamePos = Tuple.Create(int.Parse(configuration["Source:EntityName:Row"] ?? "-1"),
             int.Parse(configuration["Source:EntityName:Column"] ?? "-1"));
-        _skippedFields = configuration.GetSection("Generated:Entity:SkippedFields").GetChildren().Select(c => c.Value);
+        _skippedEntityFields = configuration.GetSection("Generated:Entity:SkippedFields").GetChildren()
+            .Select(c => c.Value);
+        _skippedDtoFields = configuration.GetSection("Generated:Dto:SkippedFields").GetChildren().Select(c => c.Value);
+        _mappingDtoFields = configuration.GetSection("Generated:Dto:Mapping").GetChildren()
+            .ToDictionary(x => x.Key, x => x.Value);
     }
 
     public static ExcelDbObject BuildEntityFromSheet(IXLWorksheet ws)

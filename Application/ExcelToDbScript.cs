@@ -29,8 +29,6 @@ public class ExcelToDbScript(IConfiguration config)
                     AnsiConsole.MarkupLine($"Generated {sheetName}");
                 }
             });
-
-        Console.ReadLine();
     }
 
     private List<string> SelectSheets()
@@ -71,13 +69,15 @@ public class ExcelToDbScript(IConfiguration config)
 
     private async Task Render(ExcelDbObject obj)
     {
-        await RenderEntity(obj);
+        var objDict = obj.ToDictionary();
+
+        await RenderEntity(objDict);
+        await RenderDto(objDict);
     }
 
-    private async Task RenderEntity(ExcelDbObject obj)
+    private async Task RenderEntity(Dictionary<string, object> objDict)
     {
         var stubble = new StubbleBuilder().Build();
-        var entity = obj.ToDictionary();
         string template;
         string updateTemplate;
 
@@ -100,14 +100,43 @@ public class ExcelToDbScript(IConfiguration config)
         var output = RemoveRedundantLines(await stubble.RenderAsync(template,
             new
             {
-                Entity = entity,
+                Entity = objDict,
                 EntityNamespace = config["Generated:Entity:Namespace"]
             }, new Dictionary<string, string>
             {
                 { "Update", updateTemplate }
             }));
 
-        var folderPath = Path.Combine(_pathGeneration, "Entities", $"{obj.Name}.cs");
+        var folderPath = Path.Combine(_pathGeneration, "Entities", $"{objDict.GetValueOrDefault("Name")}.cs");
+        new FileInfo(folderPath).Directory?.Create(); // If the directory already exists, this method does nothing.
+
+        await using (var sw = new StreamWriter(folderPath, !File.Exists(folderPath)))
+        {
+            await sw.WriteLineAsync(output);
+        }
+    }
+
+    private async Task RenderDto(Dictionary<string, object> objDict)
+    {
+        var stubble = new StubbleBuilder().Build();
+        string template;
+
+        using (var sr =
+            new StreamReader(
+                Path.Combine(Directory.GetCurrentDirectory(), @"Templates\ExcelToDb\Dto.mustache"),
+                Encoding.UTF8))
+        {
+            template = await sr.ReadToEndAsync();
+        }
+
+        var output = RemoveRedundantLines(await stubble.RenderAsync(template,
+            new
+            {
+                Entity = objDict,
+                DtoNamespace = config["Generated:Dto:Namespace"]
+            }));
+
+        var folderPath = Path.Combine(_pathGeneration, "Dtos", $"{objDict.GetValueOrDefault("Name")}Dto.cs");
         new FileInfo(folderPath).Directory?.Create(); // If the directory already exists, this method does nothing.
 
         await using (var sw = new StreamWriter(folderPath, !File.Exists(folderPath)))

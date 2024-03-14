@@ -1,0 +1,12 @@
+using Application.Common.Interfaces;
+using Domain.Common;
+
+namespace {{DtoNamespace}};
+
+{{#Entity}}
+public class {{Name}} : IDto
+{
+{{#DtoFields}}
+    public {{Type}}{{^IsRequired}}?{{/IsRequired}} {{Name}} { get; set; }{{#HasDefaultValue}} = {{DefaultValue}};{{/HasDefaultValue}}
+{{/DtoFields}}
+}{{/Entity}}
