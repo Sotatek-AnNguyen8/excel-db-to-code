@@ -9,7 +9,7 @@ namespace {{CqrsNamespace}}.{{#Entity}}{{Name}}{{/Entity}}.Queries;
 {{#Entity}}
 public class Get{{Name}}ByIdQuery : IRequest<ResponseBase<{{Name}}Dto>>
 {
-    public DefaultIdType Id { get; init; }
+    public {{IdType}} Id { get; init; }
 }
 
 public class Get{{Name}}ByIdQueryHandler(IRepository<{{Name}}> {{VarName}}Repository) : IRequestHandler<Get{{Name}}ByIdQuery, ResponseBase<{{Name}}Dto>>

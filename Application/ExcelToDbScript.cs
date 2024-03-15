@@ -152,6 +152,7 @@ public class ExcelToDbScript(IConfiguration config)
         var view = new
         {
             Entity = objDict,
+            IdType = config["Generated:Entity:IdType"],
             EntityNamespace = config["Generated:Entity:Namespace"],
             DtoNamespace = config["Generated:Dto:Namespace"],
             CqrsNamespace = config["Generated:Cqrs:Namespace"],
