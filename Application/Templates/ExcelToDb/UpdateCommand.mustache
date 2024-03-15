@@ -1,0 +1,55 @@
+using Application.Common.Exceptions;
+using Application.Common.Responses;
+using Application.Common.Repositories;
+using Application.Common.UnitOfWork;
+using {{ValidationNamespace}};
+using {{ValidationNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}};
+using Domain.Common;
+using {{EntityNamespace}};
+using FluentValidation;
+using MediatR;
+using Shared.Constants;
+
+namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
+
+{{#Entity}}
+public class Update{{Name}}Command : IRequest<ResponseBase<{{Name}}>>, I{{Name}}Command
+{
+    public {{IdType}} Id { get; set; }
+{{#EntityFields}}
+    public {{Type}}{{^IsRequired}}?{{/IsRequired}} {{Name}} { get; set; }{{#HasDefaultValue}} = {{DefaultValue}};{{/HasDefaultValue}}
+{{/EntityFields}}
+}
+
+public class Update{{Name}}CommandValidator : AbstractValidator<Update{{Name}}Command>
+{
+    public Update{{Name}}CommandValidator()
+    {
+        RuleFor(p => p.Id)
+            .NotEmpty();
+        {{Name}}Validator.ApplyRules(this);
+    }
+}
+
+public class Update{{Name}}CommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<Update{{Name}}Command, ResponseBase<{{Name}}>>
+{
+    private readonly IRepository<{{Name}}> _{{VarName}}Repository = unitOfWork.GetRepository<{{Name}}>();
+
+    public async Task<ResponseBase<{{Name}}>> Handle(Update{{Name}}Command request, CancellationToken cancellationToken)
+    {
+        var {{VarName}} = await _{{VarName}}Repository.GetFirstOrDefaultAsync(predicate: x => x.Id == request.Id, disableTracking: false)
+            ?? throw new NotFoundException(MessageCommon.SetEntityNotFound("{{Name}}", request.Id));
+    
+        {{VarName}}.Update({{Params}});
+    
+        _{{VarName}}Repository.Update({{VarName}});
+        await unitOfWork.SaveChangesAsync();
+
+        return new ResponseBase<{{Name}}>
+        {
+            Result = {{VarName}},
+            Success = true,
+            Message = MessageCommon.UpdateSuccess
+        };
+    }
+}{{/Entity}}

@@ -173,6 +173,7 @@ public class ExcelToDbScript(IConfiguration config)
             Tuple.Create("GetByIdQuery", $@"Cqrs\{name}\Queries", $"Get{name}ByIdQuery.cs"),
             Tuple.Create("GetByConditionQuery", $@"Cqrs\{name}\Queries", $"Get{name}ByConditionQuery.cs"),
             Tuple.Create("CreateCommand", $@"Cqrs\{name}\Commands", $"Create{name}Command.cs"),
+            Tuple.Create("UpdateCommand", $@"Cqrs\{name}\Commands", $"Update{name}Command.cs"),
             Tuple.Create("BaseCommand", $@"Cqrs\{name}", $"I{name}Command.cs"),
             Tuple.Create("Validation", $@"Cqrs\{name}", $"{name}ValidationRules.cs"),
         ];
