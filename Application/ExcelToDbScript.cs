@@ -23,13 +23,13 @@ public class ExcelToDbScript(IConfiguration config)
         var sheetsName = SelectSheets();
 
         await AnsiConsole.Status()
-            .StartAsync("Rendering...", async ctx =>
+            .StartAsync("Generating...", async ctx =>
             {
                 foreach (var sheetName in sheetsName)
                 {
-                    ctx.Status($"Rendering {sheetName}");
+                    ctx.Status($"Generating {sheetName}");
                     var entity = ExcelDbObject.BuildEntityFromSheet(_wb.Worksheet(sheetName));
-                    await Render(entity);
+                    await Generate(entity);
                     AnsiConsole.MarkupLine($"Generated {sheetName}");
                 }
             });
@@ -75,17 +75,18 @@ public class ExcelToDbScript(IConfiguration config)
         return sheets;
     }
 
-    private async Task Render(ExcelDbObject obj)
+    private async Task Generate(ExcelDbObject obj)
     {
         var objDict = obj.ToDictionary();
 
-        await RenderEntity(objDict);
-        await RenderDto(objDict);
-        await RenderCqrs(objDict);
-        await RenderController(objDict);
+        await GenerateEnum(objDict);
+        await GenerateEntity(objDict);
+        await GenerateDto(objDict);
+        await GenerateCqrs(objDict);
+        await GenerateController(objDict);
     }
 
-    private async Task RenderEntity(Dictionary<string, object> objDict)
+    private async Task GenerateEnum(Dictionary<string, object> objDict)
     {
         var stubble = new StubbleBuilder().Build();
         string template;
@@ -127,7 +128,49 @@ public class ExcelToDbScript(IConfiguration config)
         }
     }
 
-    private async Task RenderDto(Dictionary<string, object> objDict)
+    private async Task GenerateEntity(Dictionary<string, object> objDict)
+    {
+        var stubble = new StubbleBuilder().Build();
+        string template;
+        string updateTemplate;
+
+        using (var sr =
+            new StreamReader(
+                Path.Combine(Directory.GetCurrentDirectory(), @"Templates\ExcelToDb\Entity.mustache"),
+                Encoding.UTF8))
+        {
+            template = await sr.ReadToEndAsync();
+        }
+
+        using (var sr =
+            new StreamReader(
+                Path.Combine(Directory.GetCurrentDirectory(), @"Templates\ExcelToDb\Entity_Update.mustache"),
+                Encoding.UTF8))
+        {
+            updateTemplate = await sr.ReadToEndAsync();
+        }
+
+        var output = RemoveRedundantLines(await stubble.RenderAsync(template,
+            new
+            {
+                Entity = objDict,
+                EntityNamespace = config["Generated:Entity:Namespace"],
+                IdType = config["Generated:Entity:IdType"]
+            }, new Dictionary<string, string>
+            {
+                { "Update", updateTemplate }
+            }));
+
+        var folderPath = Path.Combine(_pathGeneration, "Entities", $"{objDict.GetValueOrDefault("Name")}.cs");
+        new FileInfo(folderPath).Directory?.Create(); // If the directory already exists, this method does nothing.
+
+        await using (var sw = new StreamWriter(folderPath, !File.Exists(folderPath)))
+        {
+            await sw.WriteLineAsync(output);
+        }
+    }
+
+    private async Task GenerateDto(Dictionary<string, object> objDict)
     {
         var stubble = new StubbleBuilder().Build();
         string template;
@@ -156,7 +199,7 @@ public class ExcelToDbScript(IConfiguration config)
         }
     }
 
-    private async Task RenderCqrs(Dictionary<string, object> objDict)
+    private async Task GenerateCqrs(Dictionary<string, object> objDict)
     {
         var name = objDict.GetValueOrDefault("Name");
         var view = new
@@ -209,7 +252,7 @@ public class ExcelToDbScript(IConfiguration config)
         }
     }
 
-    private async Task RenderController(Dictionary<string, object> objDict)
+    private async Task GenerateController(Dictionary<string, object> objDict)
     {
         var stubble = new StubbleBuilder().Build();
         string template;
