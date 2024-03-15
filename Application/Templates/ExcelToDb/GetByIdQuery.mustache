@@ -17,7 +17,7 @@ public class Get{{Name}}ByIdQueryHandler(IRepository<{{Name}}> {{VarName}}Reposi
     public async Task<ResponseBase<{{Name}}Dto>> Handle(Get{{Name}}ByIdQuery request, CancellationToken cancellationToken)
     {
         var {{VarName}} = await {{VarName}}Repository.GetByIdAsync(request.Id, cancellationToken);
-        var {{VarName}}Dto = category.Adapt<{{Name}}Dto>();
+        var {{VarName}}Dto = {{VarName}}.Adapt<{{Name}}Dto>();
         
         return new ResponseBase<{{Name}}Dto>
         {

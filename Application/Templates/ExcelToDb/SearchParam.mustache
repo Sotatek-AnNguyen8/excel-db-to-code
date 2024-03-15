@@ -1,0 +1,12 @@
+using Application.Common.Interfaces;
+using Domain.Common;
+
+namespace {{ParamNamespace}};
+
+{{#Entity}}
+public class Search{{Name}}Param : PaginationFilter
+{
+{{#EntityFields}}
+    public {{Type}}? {{Name}} { get; set; }
+{{/EntityFields}}
+}{{/Entity}}

@@ -4,7 +4,7 @@ using Domain.Common;
 namespace {{DtoNamespace}};
 
 {{#Entity}}
-public class {{Name}} : IDto
+public class {{Name}}Dto : IDto
 {
 {{#DtoFields}}
     public {{Type}}{{^IsRequired}}?{{/IsRequired}} {{Name}} { get; set; }{{#HasDefaultValue}} = {{DefaultValue}};{{/HasDefaultValue}}

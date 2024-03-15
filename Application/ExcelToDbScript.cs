@@ -111,7 +111,8 @@ public class ExcelToDbScript(IConfiguration config)
             new
             {
                 Entity = objDict,
-                EntityNamespace = config["Generated:Entity:Namespace"]
+                EntityNamespace = config["Generated:Entity:Namespace"],
+                IdType = config["Generated:Entity:IdType"]
             }, new Dictionary<string, string>
             {
                 { "Update", updateTemplate }
@@ -165,7 +166,8 @@ public class ExcelToDbScript(IConfiguration config)
             EntityNamespace = config["Generated:Entity:Namespace"],
             DtoNamespace = config["Generated:Dto:Namespace"],
             CqrsNamespace = config["Generated:Cqrs:Namespace"],
-            ValidationNamespace = config["Generated:Validation:Namespace"]
+            ValidationNamespace = config["Generated:Validation:Namespace"],
+            ParamNamespace = config["Generated:Param:Namespace"]
         };
 
         // Template name, output folder name, output file name
@@ -178,6 +180,7 @@ public class ExcelToDbScript(IConfiguration config)
             Tuple.Create("DeleteCommand", $@"Cqrs\{name}\Commands", $"Delete{name}Command.cs"),
             Tuple.Create("BaseCommand", $@"Cqrs\{name}", $"I{name}Command.cs"),
             Tuple.Create("Validation", $@"Cqrs\{name}", $"{name}ValidationRules.cs"),
+            Tuple.Create("SearchParam", $@"Cqrs\{name}", $"Search{name}Param.cs")
         ];
 
         var stubble = new StubbleBuilder().Build();

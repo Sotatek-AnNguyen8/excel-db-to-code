@@ -17,7 +17,7 @@ public class Search{{Name}}Param : PaginationFilter
 {{/EntityFields}}
 }
 
-public class Get{{Name}}ByConditionQueryHandler : Search{{Name}}Param, IRequest<ResponseBase<PaginationResponse<{{Name}}Dto>>>;
+public class Get{{Name}}ByConditionQuery : Search{{Name}}Param, IRequest<ResponseBase<PaginationResponse<{{Name}}Dto>>>;
 
 public sealed class {{Name}}Spec : Specification<{{Name}}, {{Name}}Dto>, ISingleResultSpecification<{{Name}}>
 {
@@ -27,9 +27,9 @@ public sealed class {{Name}}Spec : Specification<{{Name}}, {{Name}}Dto>, ISingle
     }
 }
 
-public class Get{{Name}}ByConditionQueryHandler(IRepository<{{Name}}> {{VarName}}Repository) : IRequestHandler<Get{{Name}}ByIdQuery, ResponseBase<PaginationResponse<{{Name}}Dto>>
+public class Get{{Name}}ByConditionQueryHandler(IRepository<{{Name}}> {{VarName}}Repository) : IRequestHandler<Get{{Name}}ByConditionQuery, ResponseBase<PaginationResponse<{{Name}}Dto>>>
 {
-    public async Task<ResponseBase<{{Name}}Dto>> Handle(Get{{Name}}ByIdQuery request, CancellationToken cancellationToken)
+    public async Task<ResponseBase<PaginationResponse<{{Name}}Dto>>> Handle(Get{{Name}}ByConditionQuery request, CancellationToken cancellationToken)
     {
         var spec = new {{Name}}Spec({{Params}});
 

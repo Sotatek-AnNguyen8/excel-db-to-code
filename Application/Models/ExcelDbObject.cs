@@ -104,8 +104,8 @@ public class ExcelDbObject
                         { "MaxLength", f.Length },
                         // Additional
                         { "HasMaxLength", f is { Type: ExcelDbEntityFieldType.Varchar, Length: > 0 } },
-                        { "IsRequired", f.IsNullable },
-                        { "HasDefaultValue", f is { Type: ExcelDbEntityFieldType.Varchar, IsNullable: true } }
+                        { "IsRequired", !f.IsNullable },
+                        { "HasDefaultValue", f is { Type: ExcelDbEntityFieldType.Varchar, IsNullable: false } }
                     })
             },
             // Additional
@@ -134,6 +134,12 @@ public class ExcelDbObject
                 string.Join("\n",
                     entityFields.Select(
                         f => $"{new string(' ', 8)}{f.Name} = {f.Name.ToVariableCase()};"))
+            },
+            {
+                "ParamInit",
+                string.Join(", ",
+                    entityFields.Select(
+                        f => $"{f.Name} = request.{f.Name}"))
             }
         };
     }
@@ -290,7 +296,7 @@ public class ExcelDbObject
         if (field.Type == ExcelDbEntityFieldType.Varchar)
         {
             return $$"""
-                             if (!string.IsNullOrEmpty({{field.Name}}))
+                             if (!string.IsNullOrEmpty({{varName}}))
                              {
                                  Query.Where({{varAbbr}} => {{varAbbr}}.{{field.Name}}.Contains({{varName}}));
                              }
@@ -300,7 +306,7 @@ public class ExcelDbObject
         return $$"""
                          if (status != null)
                          {
-                             Query.Where({{varAbbr}} => {{varAbbr}}.{{field.Name}}.Contains({{varName}}));
+                             Query.Where({{varAbbr}} => {{varAbbr}}.{{field.Name}} != {{varName}});
                          }
                  """;
     }

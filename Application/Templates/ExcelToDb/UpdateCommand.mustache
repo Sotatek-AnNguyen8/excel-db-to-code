@@ -1,8 +1,7 @@
 using Application.Common.Exceptions;
-using Application.Common.Responses;
 using Application.Common.Repositories;
+using Application.Common.Responses;
 using Application.Common.UnitOfWork;
-using {{ValidationNamespace}};
 using {{ValidationNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}};
 using Domain.Common;
 using {{EntityNamespace}};
@@ -15,7 +14,7 @@ namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
 {{#Entity}}
 public class Update{{Name}}Command : IRequest<ResponseBase<{{Name}}>>, I{{Name}}Command
 {
-    public {{IdType}} Id { get; set; }
+    public {{IdType}} Id { get; init; }
 {{#EntityFields}}
     public {{Type}}{{^IsRequired}}?{{/IsRequired}} {{Name}} { get; set; }{{#HasDefaultValue}} = {{DefaultValue}};{{/HasDefaultValue}}
 {{/EntityFields}}

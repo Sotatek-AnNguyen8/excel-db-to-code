@@ -31,7 +31,7 @@ public class Create{{Name}}CommandHandler(IUnitOfWork unitOfWork) : IRequestHand
 
     public async Task<ResponseBase<{{Name}}>> Handle(Create{{Name}}Command request, CancellationToken cancellationToken)
     {
-        var entityEntry = await _{{VarName}}Repository.InsertAsync(new {{Name}} { {{Params}} }, cancellationToken);
+        var entityEntry = await _{{VarName}}Repository.InsertAsync(new {{Name}} { {{ParamInit}} }, cancellationToken);
     
         await unitOfWork.SaveChangesAsync();
     

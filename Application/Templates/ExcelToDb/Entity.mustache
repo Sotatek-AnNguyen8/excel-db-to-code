@@ -3,8 +3,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace {{EntityNamespace}};
 
+public class {{#Entity}}{{Name}}{{/Entity}} : AuditableEntity<{{IdType}}>, IAggregateRoot
 {{#Entity}}
-public class {{Name}} : AuditableEntity, IAggregateRoot
 {
 {{#EntityFields}}
     {{! Attributes }}
