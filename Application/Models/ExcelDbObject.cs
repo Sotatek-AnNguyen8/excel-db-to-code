@@ -37,6 +37,7 @@ public class ExcelDbObject
     private static int _cDefaultValue;
     private static int _cType;
     private static int _cLength;
+    private static string _modelSuffix = string.Empty;
     private static IEnumerable<string?> _skippedEntityFields = [];
     private static IEnumerable<string?> _skippedDtoFields = [];
     private static Dictionary<string, string?> _mappingDtoFields = new();
@@ -45,6 +46,7 @@ public class ExcelDbObject
     private static Tuple<int, int> _entityNamePos = null!;
 
     private string Name { get; init; } = null!;
+    private string OriginName { get; init; } = null!;
     private List<ExcelDbEntityField> Fields { get; init; } = [];
 
     public Dictionary<string, object> ToDictionary()
@@ -110,9 +112,9 @@ public class ExcelDbObject
             },
             // Additional
             { "VarName", Name.ToVariableCase() },
-            { "NameSingularHumanize", Name.Humanize(LetterCasing.LowerCase) },
             { "NamePlural", Name.Pluralize() },
-            { "NamePluralHumanize", Name.Pluralize().Humanize(LetterCasing.LowerCase) },
+            { "NamePluralHumanize", OriginName.Pluralize().Humanize(LetterCasing.LowerCase) },
+            { "NameSingularHumanize", OriginName.Humanize(LetterCasing.LowerCase) },
             { "ParamValidation", string.Join("\n", entityFields.Select(GetParamValidation)) },
             {
                 "Arguments",
@@ -155,6 +157,7 @@ public class ExcelDbObject
         _cDefaultValue = int.Parse(configuration["Source:Columns:DefaultValue"] ?? "-1");
         _cType = int.Parse(configuration["Source:Columns:Type"] ?? "-1");
         _cLength = int.Parse(configuration["Source:Columns:Length"] ?? "-1");
+        _modelSuffix = configuration["Generated:ModelSuffix"] ?? "";
         _entityNamePos = Tuple.Create(int.Parse(configuration["Source:EntityName:Row"] ?? "-1"),
             int.Parse(configuration["Source:EntityName:Column"] ?? "-1"));
         _skippedEntityFields = configuration.GetSection("Generated:Entity:SkippedFields").GetChildren()
@@ -169,6 +172,7 @@ public class ExcelDbObject
         var entity = new ExcelDbObject
         {
             Name = GetName(ws),
+            OriginName = GetOriginName(ws),
             Fields = GetFields(ws)
         };
 
@@ -177,10 +181,22 @@ public class ExcelDbObject
 
     private static string GetName(IXLWorksheet ws)
     {
-        return string.Join("", ws.Cell(_entityNamePos.Item1, _entityNamePos.Item2)
+        var nameFromExcel = string.Join("", ws.Cell(_entityNamePos.Item1, _entityNamePos.Item2)
             .GetText()
             .Split(' ')
             .Select((str, idx) => idx == 0 ? str : str.ToVariableCase()));
+
+        return nameFromExcel + _modelSuffix;
+    }
+
+    private static string GetOriginName(IXLWorksheet ws)
+    {
+        var nameFromExcel = string.Join("", ws.Cell(_entityNamePos.Item1, _entityNamePos.Item2)
+            .GetText()
+            .Split(' ')
+            .Select((str, idx) => idx == 0 ? str : str.ToVariableCase()));
+
+        return nameFromExcel;
     }
 
     private static List<ExcelDbEntityField> GetFields(IXLWorksheet ws)
