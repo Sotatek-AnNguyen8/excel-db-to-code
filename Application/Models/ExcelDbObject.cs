@@ -1,5 +1,6 @@
 ﻿using Application.Extensions;
 using ClosedXML.Excel;
+using Humanizer;
 using Microsoft.Extensions.Configuration;
 
 namespace Application.Models;
@@ -79,9 +80,9 @@ public class ExcelDbObject
                         { "MaxLength", f.Length },
                         // Additional
                         { "HasMaxLength", f is { Type: ExcelDbEntityFieldType.Varchar, Length: > 0 } },
-                        { "IsRequired", f.IsNullable },
+                        { "IsRequired", !f.IsNullable },
                         { "HasDefaultValue", f is { Type: ExcelDbEntityFieldType.Varchar, IsNullable: true } },
-                        { "Validation", GetValidation(f) },
+                        { "Validation", GetValidation(f) }
                     })
             },
             {
@@ -109,6 +110,7 @@ public class ExcelDbObject
                     })
             },
             // Additional
+            { "NamePlural", Name.Pluralize() },
             { "ParamValidation", string.Join("\n", entityFields.Select(GetParamValidation)) },
             {
                 "Arguments",

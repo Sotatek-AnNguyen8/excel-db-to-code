@@ -4,7 +4,7 @@ using {{EntityNamespace}};
 using Mapster;
 using MediatR;
 
-namespace {{CqrsNamespace}}.{{#Entity}}{{Name}}{{/Entity}}.Queries;
+namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Queries;
 
 {{#Entity}}
 public class Get{{Name}}ByIdQuery : IRequest<ResponseBase<{{Name}}Dto>>
@@ -21,7 +21,7 @@ public class Get{{Name}}ByIdQueryHandler(IRepository<{{Name}}> {{VarName}}Reposi
         
         return new ResponseBase<{{Name}}Dto>
         {
-            Result = {{varName}}Dto,
+            Result = {{VarName}}Dto,
             Success = true
         };
     }
