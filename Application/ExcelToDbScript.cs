@@ -12,6 +12,10 @@ public class ExcelToDbScript(IConfiguration config)
 {
     private readonly string _pathToExcelFile = config["Source:PathToExcelFile"]!;
     private readonly string _pathGeneration = config["Generated:Path"]!;
+
+    private readonly IEnumerable<string> _includeKeyword =
+        config.GetSection("Source:IncludeKeyword").GetChildren().Select(c => c.Value).Where(c => c != null)!;
+
     private XLWorkbook _wb = null!;
 
     public async Task Run()
@@ -56,7 +60,11 @@ public class ExcelToDbScript(IConfiguration config)
         foreach (var ws in _wb.Worksheets)
         {
             var firstCellValue = ws.Cell(1, 1).Value;
-            if (firstCellValue.Type == XLDataType.Text && firstCellValue.GetText() == "HOME")
+            if ((!_includeKeyword.Any() ||
+                 _includeKeyword.FirstOrDefault(k =>
+                     ws.Name.Contains(k, StringComparison.CurrentCultureIgnoreCase)) != null) &&
+                firstCellValue.Type == XLDataType.Text &&
+                firstCellValue.GetText() == "HOME")
             {
                 sheets.Add(ws.Name);
             }
@@ -164,6 +172,7 @@ public class ExcelToDbScript(IConfiguration config)
         [
             Tuple.Create("GetByIdQuery", $@"Cqrs\{name}\Queries", $"Get{name}ByIdQuery.cs"),
             Tuple.Create("GetByConditionQuery", $@"Cqrs\{name}\Queries", $"Get{name}ByConditionQuery.cs"),
+            Tuple.Create("BaseCommand", $@"Cqrs\{name}", $"I{name}Command.cs"),
             Tuple.Create("Validation", $@"Cqrs\{name}", $"{name}ValidationRules.cs"),
         ];
 
