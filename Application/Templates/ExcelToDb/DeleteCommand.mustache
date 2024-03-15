@@ -1,0 +1,48 @@
+using Application.Common.Exceptions;
+using Application.Common.Responses;
+using Application.Common.Repositories;
+using Application.Common.UnitOfWork;
+using {{ValidationNamespace}};
+using Domain.Common;
+using {{EntityNamespace}};
+using FluentValidation;
+using MediatR;
+using Shared.Constants;
+
+namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
+
+{{#Entity}}
+public class Delete{{Name}}Command : IRequest<ResponseBase<bool>>
+{
+    public {{IdType}} Id { get; set; }
+}
+
+public class Delete{{Name}}CommandValidator : AbstractValidator<Delete{{Name}}Command>
+{
+    public Delete{{Name}}CommandValidator()
+    {
+        RuleFor(p => p.Id)
+            .NotEmpty();
+    }
+}
+
+public class Delete{{Name}}CommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<Delete{{Name}}Command, ResponseBase<bool>>
+{
+    private readonly IRepository<{{Name}}> _{{VarName}}Repository = unitOfWork.GetRepository<{{Name}}>();
+
+    public async Task<ResponseBase<bool>> Handle(Delete{{Name}}Command request, CancellationToken cancellationToken)
+    {
+        var {{VarName}} = await _{{VarName}}Repository.GetFirstOrDefaultAsync(predicate: x => x.Id == request.Id, disableTracking: false)
+            ?? throw new NotFoundException(MessageCommon.SetEntityNotFound("{{Name}}", request.Id));
+    
+        _{{VarName}}Repository.Delete({{VarName}});
+        await unitOfWork.SaveChangesAsync();
+
+        return new ResponseBase<bool>
+        {
+            Result = true,
+            Success = true,
+            Message = MessageCommon.DeleteSuccess
+        };
+    }
+}{{/Entity}}

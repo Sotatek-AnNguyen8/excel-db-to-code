@@ -7,12 +7,12 @@ The Excel-db-to-code Generator is a command-line tool designed to assist develop
 - Convert Excel data into various code components:
     - [x] Entities
     - [x] Dtos
-    - [ ] Basic CQRS
+    - [x] Basic CQRS
       - [x] Get by condition
       - [x] Get by ID
       - [x] Create
       - [x] Update
-      - [ ] Delete
+      - [x] Delete
       - [x] Validation
     - [ ] Controllers
 - Customize templates: Define your own code generation templates to suit your project's requirements.
