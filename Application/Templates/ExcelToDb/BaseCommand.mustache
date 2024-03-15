@@ -1,0 +1,11 @@
+﻿using Domain.Common;
+
+using {{ValidationNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}};
+
+{{#Entity}}
+public interface I{{Name}}Command
+{
+{{#EntityFields}}
+    public {{Type}}{{^IsRequired}}?{{/IsRequired}} {{Name}} { get; set; }
+{{/EntityFields}}
+}{{/Entity}}
