@@ -80,7 +80,7 @@ public class ExcelDbObject
                         // Additional
                         { "HasMaxLength", f is { Type: ExcelDbEntityFieldType.Varchar, Length: > 0 } },
                         { "IsRequired", !f.IsNullable },
-                        { "HasDefaultValue", f is { Type: ExcelDbEntityFieldType.Varchar, IsNullable: true } },
+                        { "HasDefaultValue", f is { Type: ExcelDbEntityFieldType.Varchar, IsNullable: false } },
                         { "Validation", GetValidation(f) }
                     })
             },
