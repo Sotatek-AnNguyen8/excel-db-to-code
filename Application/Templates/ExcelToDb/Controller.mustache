@@ -1,0 +1,60 @@
+using {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
+using {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Queries;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using NSwag.Annotations;
+
+namespace {{ControllerNamespace}};
+
+{{#Entity}}
+[AllowAnonymous]
+public class {{Name}}Controller : VersionedApiController
+{
+    [HttpPost]
+    [OpenApiOperation("Create a new {{NameSingularHumanize}}", "")]
+    public async Task<IActionResult> CreateAsync(Create{{Name}}Command request)
+    {
+        var result = await Mediator.Send(request);
+        return Ok(result);
+    }
+    
+    [HttpPut]
+    [OpenApiOperation("Update a {{NameSingularHumanize}}", "")]
+    public async Task<IActionResult> UpdateAsync(Update{{Name}}Command request)
+    {
+        var result = await Mediator.Send(request);
+        return Ok(result);
+    }
+    
+    [HttpDelete]
+    [OpenApiOperation("Delete a {{NameSingularHumanize}}", "")]
+    public async Task<IActionResult> DeleteAsync(Delete{{Name}}Command request)
+    {
+        var result = await Mediator.Send(request);
+        return Ok(result);
+    }
+    
+    [HttpGet]
+    [OpenApiOperation("Get {{NamePluralHumanize}} by conditions", "")]
+    public async Task<IActionResult> GetAsync([FromQuery] Search{{Name}}Param request)
+    {
+        var result = await Mediator.Send(new Get{{Name}}sByConditionQuery
+        {
+            Name = request.Name,
+            Status = request.Status,
+            PageIndex = request.PageIndex,
+            PageSize = request.PageSize
+        });
+        return Ok(result);
+    }
+    
+    [HttpGet("{id:guid}")]
+    [OpenApiOperation("Get {{NameSingularHumanize}} details by id.", "")]
+    public async Task<IActionResult> GetById({{IdType}} id)
+    {
+        return Ok(await Mediator.Send(new Get{{Name}}ByIdQuery
+        {
+            Id = id
+        }));
+    }
+}{{/Entity}}                   

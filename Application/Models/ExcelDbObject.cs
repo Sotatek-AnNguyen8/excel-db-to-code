@@ -59,7 +59,6 @@ public class ExcelDbObject
         return new Dictionary<string, object>
         {
             { "Name", Name },
-            { "VarName", Name.ToVariableCase() },
             {
                 "EntityFields", entityFields
                     .Select(f => new Dictionary<string, object?>
@@ -110,7 +109,10 @@ public class ExcelDbObject
                     })
             },
             // Additional
+            { "VarName", Name.ToVariableCase() },
+            { "NameSingularHumanize", Name.Humanize(LetterCasing.LowerCase) },
             { "NamePlural", Name.Pluralize() },
+            { "NamePluralHumanize", Name.Pluralize().Humanize(LetterCasing.LowerCase) },
             { "ParamValidation", string.Join("\n", entityFields.Select(GetParamValidation)) },
             {
                 "Arguments",

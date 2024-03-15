@@ -82,6 +82,7 @@ public class ExcelToDbScript(IConfiguration config)
         await RenderEntity(objDict);
         await RenderDto(objDict);
         await RenderCqrs(objDict);
+        await RenderController(objDict);
     }
 
     private async Task RenderEntity(Dictionary<string, object> objDict)
@@ -164,7 +165,7 @@ public class ExcelToDbScript(IConfiguration config)
             EntityNamespace = config["Generated:Entity:Namespace"],
             DtoNamespace = config["Generated:Dto:Namespace"],
             CqrsNamespace = config["Generated:Cqrs:Namespace"],
-            ValidationNamespace = config["Generated:Validation:Namespace"],
+            ValidationNamespace = config["Generated:Validation:Namespace"]
         };
 
         // Template name, output folder name, output file name
@@ -202,6 +203,36 @@ public class ExcelToDbScript(IConfiguration config)
             {
                 await sw.WriteLineAsync(output);
             }
+        }
+    }
+
+    private async Task RenderController(Dictionary<string, object> objDict)
+    {
+        var stubble = new StubbleBuilder().Build();
+        string template;
+
+        using (var sr =
+            new StreamReader(
+                Path.Combine(Directory.GetCurrentDirectory(), @"Templates\ExcelToDb\Controller.mustache"),
+                Encoding.UTF8))
+        {
+            template = await sr.ReadToEndAsync();
+        }
+
+        var output = RemoveRedundantLines(await stubble.RenderAsync(template,
+            new
+            {
+                Entity = objDict,
+                ControllerNamespace = config["Generated:Dto:Namespace"],
+                CqrsNamespace = config["Generated:Cqrs:Namespace"],
+            }));
+
+        var folderPath = Path.Combine(_pathGeneration, "Controllers", $"{objDict.GetValueOrDefault("Name")}Controller.cs");
+        new FileInfo(folderPath).Directory?.Create(); // If the directory already exists, this method does nothing.
+
+        await using (var sw = new StreamWriter(folderPath, !File.Exists(folderPath)))
+        {
+            await sw.WriteLineAsync(output);
         }
     }
 
