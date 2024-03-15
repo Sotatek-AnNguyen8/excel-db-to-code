@@ -1,0 +1,47 @@
+using Application.Common.Repositories;
+using Application.Common.UnitOfWork;
+using {{ValidationNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}};
+using Domain.Common;
+using {{EntityNamespace}};
+using FluentValidation;
+using MediatR;
+using Shared.Constants;
+
+namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
+
+{{#Entity}}
+public class Create{{Name}}Command : IRequest<ResponseBase<{{Name}}>>, I{{Name}}Command
+{
+{{#EntityFields}}
+    public {{Type}}{{^IsRequired}}?{{/IsRequired}} {{Name}} { get; set; }{{#HasDefaultValue}} = {{DefaultValue}};{{/HasDefaultValue}}
+{{/EntityFields}}
+}
+
+public class Create{{Name}}CommandValidator : AbstractValidator<Create{{Name}}Command>
+{
+    public Create{{Name}}CommandValidator()
+    {
+        {{Name}}Validator.ApplyRules(this);
+    }
+}
+
+public class Create{{Name}}CommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<Create{{Name}}Command, ResponseBase<{{Name}}>>
+{
+    private readonly IRepository<{{Name}}> _{{VarName}}Repository = unitOfWork.GetRepository<{{Name}}>();
+
+    public async Task<ResponseBase<{{Name}}>> Handle(Create{{Name}}Command request, CancellationToken cancellationToken)
+    {
+        var entityEntry = await _{{VarName}}Repository.InsertAsync(new {{Name}} { {{Params}} }, cancellationToken);
+    
+        await unitOfWork.SaveChangesAsync();
+    
+        var created{{Name}} = entityEntry.Entity;
+    
+        return new ResponseBase<{{Name}}>
+        {
+            Result = created{{Name}},
+            Success = true,
+            Message = MessageCommon.CreateSuccess
+        };
+    }
+}{{/Entity}}
