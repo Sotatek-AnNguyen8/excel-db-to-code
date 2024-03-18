@@ -255,6 +255,7 @@ public class ExcelToDbScript(IConfiguration config)
                 Entity = objDict,
                 ControllerNamespace = config["Generated:Controller:Namespace"],
                 CqrsNamespace = config["Generated:Cqrs:Namespace"],
+                IdType = config["Generated:Entity:IdType"]
             }));
 
         var folderPath = Path.Combine(_pathGeneration, "Controllers",

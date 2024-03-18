@@ -1,6 +1,5 @@
 using {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
 using {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Queries;
-using Host.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NSwag.Annotations;
@@ -41,15 +40,14 @@ public class {{Name}}Controller : VersionedApiController
     {
         var result = await Mediator.Send(new Get{{Name}}ByConditionQuery
         {
-            Name = request.Name,
-            Status = request.Status,
+            {{ParamInit}},
             PageNumber = request.PageNumber,
             PageSize = request.PageSize
         });
         return Ok(result);
     }
 
-    [HttpGet("{id:guid}")]
+    [HttpGet("{id:int}")]
     [OpenApiOperation("Get {{NameSingularHumanize}} details by id", "")]
     public async Task<IActionResult> GetById({{IdType}} id)
     {
