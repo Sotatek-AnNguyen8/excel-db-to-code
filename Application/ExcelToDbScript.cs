@@ -253,7 +253,7 @@ public class ExcelToDbScript(IConfiguration config)
             new
             {
                 Entity = objDict,
-                ControllerNamespace = config["Generated:Dto:Namespace"],
+                ControllerNamespace = config["Generated:Controller:Namespace"],
                 CqrsNamespace = config["Generated:Cqrs:Namespace"],
             }));
 
