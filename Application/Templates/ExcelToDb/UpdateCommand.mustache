@@ -37,18 +37,13 @@ public class Update{{Name}}CommandHandler(IUnitOfWork unitOfWork) : IRequestHand
     public async Task<ResponseBase<{{Name}}>> Handle(Update{{Name}}Command request, CancellationToken cancellationToken)
     {
         var {{VarName}} = await _{{VarName}}Repository.GetFirstOrDefaultAsync(predicate: x => x.Id == request.Id, disableTracking: false)
-            ?? throw new NotFoundException(MessageCommon.SetEntityNotFound("{{Name}}", request.Id));
+            ?? throw new NotFoundException(MessageCommon.SetEntityNotFound(nameof({{Name}}), request.Id));
     
         {{VarName}}.Update({{Params}});
     
         _{{VarName}}Repository.Update({{VarName}});
         await unitOfWork.SaveChangesAsync();
 
-        return new ResponseBase<{{Name}}>
-        {
-            Result = {{VarName}},
-            Success = true,
-            Message = MessageCommon.UpdateSuccess
-        };
+        return new ResponseBase<{{Name}}>({{VarName}}, MessageCommon.UpdateSuccess);
     }
 }{{/Entity}}

@@ -1,6 +1,7 @@
 using Application.Common.Persistence;
 using Application.Common.Responses;
 using {{DtoNamespace}};
+using {{ParamNamespace}};
 using {{EntityNamespace}};
 using Mapster;
 using MediatR;
@@ -19,11 +20,7 @@ public class Get{{Name}}ByIdQueryHandler(IRepository<{{Name}}> {{VarName}}Reposi
     {
         var {{VarName}} = await {{VarName}}Repository.GetByIdAsync(request.Id, cancellationToken);
         var {{VarName}}Dto = {{VarName}}.Adapt<{{Name}}Dto>();
-        
-        return new ResponseBase<{{Name}}Dto>
-        {
-            Result = {{VarName}}Dto,
-            Success = true
-        };
+
+        return new ResponseBase<{{Name}}Dto>({{VarName}}Dto);
     }
 }{{/Entity}}

@@ -9,14 +9,6 @@ using MediatR;
 
 namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Queries;
 
-{{#Entity}}
-public class Search{{Name}}Param : PaginationFilter
-{
-{{#EntityFields}}
-    public {{Type}}? {{Name}} { get; init; }
-{{/EntityFields}}
-}
-
 public class Get{{Name}}ByConditionQuery : Search{{Name}}Param, IRequest<ResponseBase<PaginationResponse<{{Name}}Dto>>>;
 
 public sealed class {{Name}}Spec : Specification<{{Name}}, {{Name}}Dto>, ISingleResultSpecification<{{Name}}>
@@ -33,13 +25,7 @@ public class Get{{Name}}ByConditionQueryHandler(IRepository<{{Name}}> {{VarName}
     {
         var spec = new {{Name}}Spec({{Params}});
 
-        var response = new ResponseBase<PaginationResponse<{{Name}}Dto>>
-        {
-            Result = await {{VarName}}Repository
-                .PaginatedListAsync(spec, request.PageNumber, request.PageSize, cancellationToken),
-            Success = true
-        };
-
-        return response;
+        return new ResponseBase<PaginationResponse<{{Name}}Dto>>(await {{VarName}}Repository
+            .PaginatedListAsync(spec, request.PageNumber, request.PageSize, cancellationToken));
     }
 }{{/Entity}}

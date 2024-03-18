@@ -37,12 +37,7 @@ public class Create{{Name}}CommandHandler(IUnitOfWork unitOfWork) : IRequestHand
         await unitOfWork.SaveChangesAsync();
     
         var created{{Name}} = entityEntry.Entity;
-    
-        return new ResponseBase<{{Name}}>
-        {
-            Result = created{{Name}},
-            Success = true,
-            Message = MessageCommon.CreateSuccess
-        };
+
+        return new ResponseBase<{{Name}}>(created{{Name}}, MessageCommon.CreateSuccess);
     }
 }{{/Entity}}
