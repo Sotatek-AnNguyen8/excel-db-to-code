@@ -2,6 +2,7 @@
 using System.Text.RegularExpressions;
 using Application.Models;
 using ClosedXML.Excel;
+using Humanizer;
 using Microsoft.Extensions.Configuration;
 using Spectre.Console;
 using Stubble.Core.Builders;
@@ -90,36 +91,18 @@ public class ExcelToDbScript(IConfiguration config)
     {
         var stubble = new StubbleBuilder().Build();
         string template;
-        string updateTemplate;
 
         using (var sr =
             new StreamReader(
-                Path.Combine(Directory.GetCurrentDirectory(), @"Templates\ExcelToDb\Entity.mustache"),
+                Path.Combine(Directory.GetCurrentDirectory(), @"Templates\ExcelToDb\Enum.mustache"),
                 Encoding.UTF8))
         {
             template = await sr.ReadToEndAsync();
         }
 
-        using (var sr =
-            new StreamReader(
-                Path.Combine(Directory.GetCurrentDirectory(), @"Templates\ExcelToDb\Entity_Update.mustache"),
-                Encoding.UTF8))
-        {
-            updateTemplate = await sr.ReadToEndAsync();
-        }
+        var output = RemoveRedundantLines(await stubble.RenderAsync(template, new { Entity = objDict }));
 
-        var output = RemoveRedundantLines(await stubble.RenderAsync(template,
-            new
-            {
-                Entity = objDict,
-                EntityNamespace = config["Generated:Entity:Namespace"],
-                IdType = config["Generated:Entity:IdType"]
-            }, new Dictionary<string, string>
-            {
-                { "Update", updateTemplate }
-            }));
-
-        var folderPath = Path.Combine(_pathGeneration, "Entities", $"{objDict.GetValueOrDefault("Name")}.cs");
+        var folderPath = Path.Combine(_pathGeneration, "Enums", $"{objDict.GetValueOrDefault("Name")}.cs");
         new FileInfo(folderPath).Directory?.Create(); // If the directory already exists, this method does nothing.
 
         await using (var sw = new StreamWriter(folderPath, !File.Exists(folderPath)))
@@ -201,7 +184,8 @@ public class ExcelToDbScript(IConfiguration config)
 
     private async Task GenerateCqrs(Dictionary<string, object> objDict)
     {
-        var name = objDict.GetValueOrDefault("Name");
+        var name = (string) objDict.GetValueOrDefault("Name")!;
+        var pluralName = name.Pluralize();
         var view = new
         {
             Entity = objDict,
@@ -216,14 +200,14 @@ public class ExcelToDbScript(IConfiguration config)
         // Template name, output folder name, output file name
         List<Tuple<string, string, string>> taskList =
         [
-            Tuple.Create("GetByIdQuery", $@"Cqrs\{name}\Queries", $"Get{name}ByIdQuery.cs"),
-            Tuple.Create("GetByConditionQuery", $@"Cqrs\{name}\Queries", $"Get{name}ByConditionQuery.cs"),
-            Tuple.Create("CreateCommand", $@"Cqrs\{name}\Commands", $"Create{name}Command.cs"),
-            Tuple.Create("UpdateCommand", $@"Cqrs\{name}\Commands", $"Update{name}Command.cs"),
-            Tuple.Create("DeleteCommand", $@"Cqrs\{name}\Commands", $"Delete{name}Command.cs"),
-            Tuple.Create("BaseCommand", $@"Cqrs\{name}", $"I{name}Command.cs"),
-            Tuple.Create("Validation", $@"Cqrs\{name}", $"{name}ValidationRules.cs"),
-            Tuple.Create("SearchParam", $@"Cqrs\{name}", $"Search{name}Param.cs")
+            Tuple.Create("GetByIdQuery", $@"Cqrs\{pluralName}\Queries", $"Get{name}ByIdQuery.cs"),
+            Tuple.Create("GetByConditionQuery", $@"Cqrs\{pluralName}\Queries", $"Get{name}ByConditionQuery.cs"),
+            Tuple.Create("CreateCommand", $@"Cqrs\{pluralName}\Commands", $"Create{name}Command.cs"),
+            Tuple.Create("UpdateCommand", $@"Cqrs\{pluralName}\Commands", $"Update{name}Command.cs"),
+            Tuple.Create("DeleteCommand", $@"Cqrs\{pluralName}\Commands", $"Delete{name}Command.cs"),
+            Tuple.Create("BaseCommand", $@"Cqrs\Validation\{pluralName}", $"I{name}Command.cs"),
+            Tuple.Create("Validation", $@"Cqrs\Validation\{pluralName}", $"{name}ValidationRules.cs"),
+            Tuple.Create("SearchParam", $@"Cqrs\{pluralName}", $"Search{name}Param.cs")
         ];
 
         var stubble = new StubbleBuilder().Build();
@@ -273,7 +257,8 @@ public class ExcelToDbScript(IConfiguration config)
                 CqrsNamespace = config["Generated:Cqrs:Namespace"],
             }));
 
-        var folderPath = Path.Combine(_pathGeneration, "Controllers", $"{objDict.GetValueOrDefault("Name")}Controller.cs");
+        var folderPath = Path.Combine(_pathGeneration, "Controllers",
+            $"{objDict.GetValueOrDefault("Name")}Controller.cs");
         new FileInfo(folderPath).Directory?.Create(); // If the directory already exists, this method does nothing.
 
         await using (var sw = new StreamWriter(folderPath, !File.Exists(folderPath)))

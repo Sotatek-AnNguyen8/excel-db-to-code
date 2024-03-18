@@ -10,20 +10,29 @@ public enum ExcelDbEntityFieldType
     Number,
     Varchar,
     Timestamp,
-    DateTime
+    DateTime,
+    Enum
 }
 
 public class ExcelDbEntityField
 {
     public int Index { get; init; }
     public string Name { get; init; } = null!;
-    public string Description { get; init; } = null!;
+    public string? Description { get; init; }
     public bool IsPrimaryKey { get; init; }
     public bool IsLookup { get; init; }
     public bool IsNullable { get; init; }
     public dynamic DefaultValue { get; init; } = null!;
     public ExcelDbEntityFieldType Type { get; init; }
     public double? Length { get; init; }
+    public ExcelDbEntityEnum? EnumType { get; init; }
+}
+
+public class ExcelDbEntityEnum
+{
+    public string Name { get; init; } = null!;
+    public string DisplayName { get; init; } = null!;
+    public List<KeyValuePair<string, int>> Values { get; init; } = null!;
 }
 
 public class ExcelDbObject
@@ -37,6 +46,9 @@ public class ExcelDbObject
     private static int _cDefaultValue;
     private static int _cType;
     private static int _cLength;
+    private static int _cEnumNo;
+    private static int _cEnumValue;
+    private static int _cEnumDescription;
     private static string _modelSuffix = string.Empty;
     private static IEnumerable<string?> _skippedEntityFields = [];
     private static IEnumerable<string?> _skippedDtoFields = [];
@@ -48,6 +60,7 @@ public class ExcelDbObject
     private string Name { get; init; } = null!;
     private string OriginName { get; init; } = null!;
     private List<ExcelDbEntityField> Fields { get; init; } = [];
+    private List<ExcelDbEntityEnum> Enums { get; init; } = [];
 
     public Dictionary<string, object> ToDictionary()
     {
@@ -77,7 +90,7 @@ public class ExcelDbObject
                                 ? string.IsNullOrEmpty(f.DefaultValue) ? "string.Empty" : $"\"{f.DefaultValue}\""
                                 : f.DefaultValue
                         },
-                        { "Type", GetType(f.Type) },
+                        { "Type", GetType(f) },
                         { "MaxLength", f.Length },
                         // Additional
                         { "HasMaxLength", f is { Type: ExcelDbEntityFieldType.Varchar, Length: > 0 } },
@@ -102,12 +115,21 @@ public class ExcelDbObject
                                 ? string.IsNullOrEmpty(f.DefaultValue) ? "string.Empty" : $"\"{f.DefaultValue}\""
                                 : f.DefaultValue
                         },
-                        { "Type", GetType(f.Type) },
+                        { "Type", GetType(f) },
                         { "MaxLength", f.Length },
                         // Additional
                         { "HasMaxLength", f is { Type: ExcelDbEntityFieldType.Varchar, Length: > 0 } },
                         { "IsRequired", !f.IsNullable },
                         { "HasDefaultValue", f is { Type: ExcelDbEntityFieldType.Varchar, IsNullable: false } }
+                    })
+            },
+            {
+                "Enums", Enums
+                    .Select(e => new Dictionary<string, object?>
+                    {
+                        { "Name", e.Name },
+                        { "DisplayName", e.DisplayName },
+                        { "EnumValues", e.Values }
                     })
             },
             // Additional
@@ -119,12 +141,12 @@ public class ExcelDbObject
             {
                 "Arguments",
                 string.Join(", ",
-                    entityFields.Select(f => $"{GetType(f.Type)} {f.Name.ToVariableCase()}"))
+                    entityFields.Select(f => $"{GetType(f)} {f.Name.ToVariableCase()}"))
             },
             {
                 "NullableArguments",
                 string.Join(", ",
-                    entityFields.Select(f => $"{GetType(f.Type)}? {f.Name.ToVariableCase()}"))
+                    entityFields.Select(f => $"{GetType(f)}? {f.Name.ToVariableCase()}"))
             },
             {
                 "Params",
@@ -157,6 +179,9 @@ public class ExcelDbObject
         _cDefaultValue = int.Parse(configuration["Source:Columns:DefaultValue"] ?? "-1");
         _cType = int.Parse(configuration["Source:Columns:Type"] ?? "-1");
         _cLength = int.Parse(configuration["Source:Columns:Length"] ?? "-1");
+        _cEnumNo = int.Parse(configuration["Source:Columns:EnumNo"] ?? "-1");
+        _cEnumValue = int.Parse(configuration["Source:Columns:EnumValue"] ?? "-1");
+        _cEnumDescription = int.Parse(configuration["Source:Columns:EnumDescription"] ?? "-1");
         _modelSuffix = configuration["Generated:ModelSuffix"] ?? "";
         _entityNamePos = Tuple.Create(int.Parse(configuration["Source:EntityName:Row"] ?? "-1"),
             int.Parse(configuration["Source:EntityName:Column"] ?? "-1"));
@@ -169,11 +194,15 @@ public class ExcelDbObject
 
     public static ExcelDbObject BuildEntityFromSheet(IXLWorksheet ws)
     {
+        var name = GetName(ws);
+        var enums = GetEnums(ws, name);
+
         var entity = new ExcelDbObject
         {
-            Name = GetName(ws),
+            Name = name,
             OriginName = GetOriginName(ws),
-            Fields = GetFields(ws)
+            Fields = GetFields(ws, enums),
+            Enums = enums
         };
 
         return entity;
@@ -199,7 +228,7 @@ public class ExcelDbObject
         return nameFromExcel;
     }
 
-    private static List<ExcelDbEntityField> GetFields(IXLWorksheet ws)
+    private static List<ExcelDbEntityField> GetFields(IXLWorksheet ws, List<ExcelDbEntityEnum> enums)
     {
         var currRow = FindFirstRow(ws);
         var fields = new List<ExcelDbEntityField>();
@@ -208,11 +237,14 @@ public class ExcelDbObject
         {
             var row = ws.Row(currRow);
             var cLengthValue = row.Cell(_cLength).Value;
+            var cDescriptionValue = row.Cell(_cDescription).Value;
             var cDefaultValueValue = row.Cell(_cDefaultValue).Value;
 
             var index = (int)row.Cell(_cIndex).Value.GetNumber();
             var name = row.Cell(_cName).Value.GetText();
-            var description = row.Cell(_cDescription).Value.GetText();
+            var enumType = enums.FirstOrDefault(e =>
+                string.Equals(e.Name, name, StringComparison.CurrentCultureIgnoreCase));
+            var description = cDescriptionValue.IsBlank ? null : cDescriptionValue.GetText();
             var isPrimaryKey = !row.Cell(_cPrimaryKey).Value.IsBlank;
             var isLookup = !row.Cell(_cLookup).Value.IsBlank;
             var isNullable = row.Cell(_cNullable).Value.IsBlank;
@@ -221,7 +253,9 @@ public class ExcelDbObject
                 : cDefaultValueValue.IsText
                     ? cDefaultValueValue.GetText()
                     : cDefaultValueValue.GetNumber();
-            var type = row.Cell(_cType).Value.GetText().ToEnum<ExcelDbEntityFieldType>();
+            var type = enumType != null
+                ? ExcelDbEntityFieldType.Enum
+                : row.Cell(_cType).Value.GetText().ToEnum<ExcelDbEntityFieldType>();
             double? length = cLengthValue.IsNumber ? cLengthValue.GetNumber() : null;
 
             fields.Add(new ExcelDbEntityField
@@ -234,6 +268,7 @@ public class ExcelDbObject
                 IsNullable = isNullable,
                 DefaultValue = defaultValue,
                 Type = type,
+                EnumType = enumType,
                 Length = length,
             });
 
@@ -241,6 +276,46 @@ public class ExcelDbObject
         }
 
         return fields;
+    }
+
+    private static List<ExcelDbEntityEnum> GetEnums(IXLWorksheet ws, string objectName)
+    {
+        var currRow = FindNextEnumRow(ws, 2);
+        var enums = new List<ExcelDbEntityEnum>();
+
+        while (currRow > 0 && !ws.Cell(currRow, _cEnumNo).Value.IsBlank)
+        {
+            var row = ws.Row(currRow);
+
+            var enumName = row.Cell(_cEnumNo).Value.GetText().ToLower().Dehumanize();
+
+            var @enum = new ExcelDbEntityEnum
+            {
+                Name = enumName,
+                DisplayName = objectName + enumName,
+                Values = []
+            };
+
+            currRow += 3;
+
+            while (!ws.Cell(currRow, _cEnumNo).Value.IsBlank)
+            {
+                row = ws.Row(currRow);
+
+                var name = row.Cell(_cEnumDescription).Value.GetText().ToLower().Dehumanize();
+                var value = (int)row.Cell(_cEnumValue).Value.GetNumber();
+
+                @enum.Values.Add(KeyValuePair.Create(name, value));
+
+                currRow++;
+            }
+
+            enums.Add(@enum);
+
+            currRow = FindNextEnumRow(ws, currRow);
+        }
+
+        return enums;
     }
 
     private static int FindFirstRow(IXLWorksheet ws)
@@ -258,15 +333,30 @@ public class ExcelDbObject
         throw new Exception("Cannot find first row, which has index cell as 1");
     }
 
-    private static string GetType(ExcelDbEntityFieldType type)
+    private static int FindNextEnumRow(IXLWorksheet ws, int skipRows)
     {
-        return type switch
+        var rows = ws.RangeUsed().RowsUsed().Skip(skipRows); // Skip header row
+        foreach (var row in rows)
+        {
+            if (row.Cell(_cEnumNo).Value.IsText && row.Cell(_cEnumValue).Value.IsBlank)
+            {
+                return row.RowNumber();
+            }
+        }
+
+        return -1;
+    }
+
+    private static string GetType(ExcelDbEntityField field)
+    {
+        return field.Type switch
         {
             ExcelDbEntityFieldType.Varchar => "string",
-            ExcelDbEntityFieldType.Number => "double",
+            ExcelDbEntityFieldType.Number => "int",
             ExcelDbEntityFieldType.Timestamp => "DateTimeOffset",
             ExcelDbEntityFieldType.DateTime => "DateTime",
-            _ => throw new Exception($"Unhandled type: {type}")
+            ExcelDbEntityFieldType.Enum => field.EnumType!.DisplayName,
+            _ => throw new Exception($"Unhandled type: {field}")
         };
     }
 
