@@ -97,7 +97,8 @@ public class ExcelDbObject
                         { "HasMaxLength", f is { Type: ExcelDbEntityFieldType.Varchar, Length: > 0 } },
                         { "IsRequired", !f.IsNullable },
                         { "HasDefaultValue", f is { Type: ExcelDbEntityFieldType.Varchar, IsNullable: false } },
-                        { "Validation", GetValidation(f) }
+                        { "Validation", GetValidation(f) },
+                        { "Mock", GetMock(f) }
                     })
             },
             {
@@ -167,11 +168,9 @@ public class ExcelDbObject
                         f => $"{f.Name} = request.{f.Name}"))
             },
             {
-                "CreateBody",
-                $"return new {Name}\n{new string(' ', 8)}{{\n"
-                + string.Join(",\n",
+                "ParamInitNonObject",
+                string.Join(",\n",
                     entityFields.Select(f => $"{new string(' ', 12)}{f.Name} = {f.Name.ToVariableCase()}"))
-                + $"\n{new string(' ', 8)}}};"
             }
         };
     }
@@ -403,6 +402,25 @@ public class ExcelDbObject
 
         return $"{new string(' ', 8)}validator.RuleFor(x => x.{field.Name})" +
                string.Join("", validations.Select(v => $"\n{new string(' ', 12)}.{v}")) + ";";
+    }
+
+    private static string GetMock(ExcelDbEntityField field)
+    {
+        var type = GetType(field);
+
+        switch (field.Type)
+        {
+            case ExcelDbEntityFieldType.Varchar:
+            case ExcelDbEntityFieldType.Number:
+            case ExcelDbEntityFieldType.Decimal:
+                return $"{type} {field.Name.ToVariableCase()} = It.IsAny<{type}>();";
+
+            case ExcelDbEntityFieldType.Timestamp:
+            case ExcelDbEntityFieldType.DateTime:
+            case ExcelDbEntityFieldType.Enum:
+            default:
+                return $"var {field.Name.ToVariableCase()} = It.IsAny<{type}>();";
+        }
     }
 
     private static string GetParamValidation(ExcelDbEntityField field)

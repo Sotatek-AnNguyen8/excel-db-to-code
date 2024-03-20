@@ -1,0 +1,48 @@
+using {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Queries;
+using Application.Common.Exceptions;
+using {{EntityNamespace}};
+using {{TestNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Builders;
+using Moq;
+using UnitTest.Application.Catalog;
+
+namespace {{TestNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Queries;
+
+{{#Entity}}
+public class Get{{Name}}ByIdQueryTest : MockRepositoryTestBase<{{Name}}>
+{
+    private readonly Get{{Name}}ByIdQueryHandler _handler;
+
+    public Get{{Name}}ByIdQueryTest()
+    {
+        _handler = new Get{{Name}}ByIdQueryHandler(mockRepository.Object);
+    }
+
+    [Fact]
+    public async Task HandleWithExistingIdShouldReturn{{Name}}()
+    {
+        var expected{{Name}} = new {{Name}}Builder()
+            .WithId(1)
+            .Build();
+
+        mockRepository.Setup(repo => repo.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expected{{Name}});
+
+        var query = new Get{{Name}}ByIdQuery { Id = 1 };
+
+        var response = await _handler.Handle(query, CancellationToken.None);
+
+        Assert.NotNull(response);
+        Assert.NotNull(response.Result);
+    }
+
+    [Fact]
+    public async Task HandleNonExistingIdShouldThrowNotFoundException()
+    {
+        mockRepository.Setup(repo => repo.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(({{Name}}?)null);
+
+        var query = new Get{{Name}}ByIdQuery { Id = 99 };
+
+        await Assert.ThrowsAsync<NotFoundException>(() => _handler.Handle(query, CancellationToken.None));
+    }
+}{{/Entity}}

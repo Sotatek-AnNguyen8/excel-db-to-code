@@ -1,0 +1,6 @@
+using {{EntityNamespace}};
+using UnitTest;
+
+namespace {{TestNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Builders;
+
+{{#Entity}}public class {{Name}}Builder : EntityBuilder<{{Name}}>;{{/Entity}}

@@ -30,7 +30,9 @@ public class ExcelToDbScript(IConfiguration config)
                 {
                     ctx.Status($"Generating {sheetName}");
                     var entity = ExcelDbObject.BuildEntityFromSheet(_wb.Worksheet(sheetName));
-                    await Generate(entity);
+                    var obj = entity.ToDictionary();
+                    await GenerateCode(obj);
+                    await GenerateTests(obj);
                     AnsiConsole.MarkupLine($"Generated {sheetName}");
                 }
             });
@@ -76,15 +78,18 @@ public class ExcelToDbScript(IConfiguration config)
         return sheets;
     }
 
-    private async Task Generate(ExcelDbObject obj)
+    private async Task GenerateCode(Dictionary<string, object> obj)
     {
-        var objDict = obj.ToDictionary();
+        await GenerateEnum(obj);
+        await GenerateEntity(obj);
+        await GenerateDto(obj);
+        await GenerateCqrs(obj);
+        await GenerateController(obj);
+    }
 
-        await GenerateEnum(objDict);
-        await GenerateEntity(objDict);
-        await GenerateDto(objDict);
-        await GenerateCqrs(objDict);
-        await GenerateController(objDict);
+    private async Task GenerateTests(Dictionary<string, object> obj)
+    {
+        await GenerateCqrsTest(obj);
     }
 
     private async Task GenerateEnum(Dictionary<string, object> objDict)
@@ -275,6 +280,59 @@ public class ExcelToDbScript(IConfiguration config)
         await using (var sw = new StreamWriter(folderPath, !File.Exists(folderPath)))
         {
             await sw.WriteLineAsync(output);
+        }
+    }
+
+    private async Task GenerateCqrsTest(Dictionary<string, object> objDict)
+    {
+        var name = (string)objDict.GetValueOrDefault("Name")!;
+        var pluralName = name.Pluralize();
+        var view = new
+        {
+            Entity = objDict,
+            // IdType = config["Generated:Entity:IdType"],
+            EntityNamespace = config["Generated:Entity:Namespace"],
+            // DtoNamespace = config["Generated:Dto:Namespace"],
+            CqrsNamespace = config["Generated:Cqrs:Namespace"],
+            // ValidationNamespace = config["Generated:Validation:Namespace"],
+            // ParamNamespace = config["Generated:Param:Namespace"],
+            TestNamespace = config["Generated:Test:Namespace"]
+        };
+
+        // Template name, output folder name, output file name
+        List<Tuple<string, string, string>> taskList =
+        [
+            Tuple.Create("GetByIdQuery", $@"Test\Cqrs\{pluralName}\Queries", $"Get{name}ByIdQueryTest.cs"),
+            // Tuple.Create("GetByConditionQuery", $@"Test\Cqrs\{pluralName}\Queries", $"Get{name}ByConditionQueryTest.cs"),
+            Tuple.Create("CreateCommand", $@"Test\Cqrs\{pluralName}\Commands", $"Create{name}CommandTest.cs"),
+            Tuple.Create("UpdateCommand", $@"Test\Cqrs\{pluralName}\Commands", $"Update{name}CommandTest.cs"),
+            Tuple.Create("DeleteCommand", $@"Test\Cqrs\{pluralName}\Commands", $"Delete{name}CommandTest.cs"),
+            Tuple.Create("Builder", $@"Test\Cqrs\{pluralName}\Builders", $"{name}Builder.cs"),
+        ];
+
+        var stubble = new StubbleBuilder().Build();
+
+        foreach (var task in taskList)
+        {
+            string template;
+
+            using (var sr =
+                new StreamReader(
+                    Path.Combine(Directory.GetCurrentDirectory(), $@"Templates\ExcelToDb\Tests\{task.Item1}.mustache"),
+                    Encoding.UTF8))
+            {
+                template = await sr.ReadToEndAsync();
+            }
+
+            var output = RemoveRedundantLines(await stubble.RenderAsync(template, view));
+
+            var folderPath = Path.Combine(_pathGeneration, task.Item2, task.Item3);
+            new FileInfo(folderPath).Directory?.Create(); // If the directory already exists, this method does nothing.
+
+            await using (var sw = new StreamWriter(folderPath, !File.Exists(folderPath)))
+            {
+                await sw.WriteLineAsync(output);
+            }
         }
     }
 

@@ -1,0 +1,53 @@
+using System.Linq.Expressions;
+using {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
+using Application.Common.Exceptions;
+using {{EntityNamespace}};
+using FluentAssertions;
+using {{TestNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Builders;
+using Moq;
+using Shared.Constants;
+using UnitTest.Application.Catalog;
+
+namespace {{TestNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
+
+{{#Entity}}
+public class Delete{{Name}}CommandTest : MockGenericRepositoryTestBase<{{Name}}>
+{
+    private readonly Delete{{Name}}CommandHandler _handler;
+
+    public Delete{{Name}}CommandTest()
+    {
+        _handler = new Delete{{Name}}CommandHandler(UnitOfWork);
+    }
+
+    [Fact]
+    public async Task HandleEntityExistsShouldDeleteEntity{{Name}}()
+    {
+        var {{VarName}} = new {{Name}}Builder()
+            .WithId(1)
+            .Build();
+
+        mockRepository.Setup(repo => repo.GetFirstOrDefaultAsync(
+                It.IsAny<Expression<Func<{{Name}}, bool>>>(), null, null, true, false))
+            .ReturnsAsync({{VarName}});
+
+        var command = new Delete{{Name}}Command { Id = 1 };
+
+        var response = await _handler.Handle(command, CancellationToken.None);
+
+        mockRepository.Verify(repo => repo.Delete(It.IsAny<{{Name}}>()), Times.Once);
+        response.Message.Should().Be(MessageCommon.DeleteSuccess);
+    }
+
+    [Fact]
+    public async Task HandleNonExistShouldThrowNotFoundException()
+    {
+        mockRepository.Setup(repo => repo.GetFirstOrDefaultAsync(
+                It.IsAny<Expression<Func<{{Name}}, bool>>>(), null, null, true, false))
+            .ReturnsAsync(({{Name}}?)null);
+
+        var command = new Delete{{Name}}Command { Id = 99 };
+
+        await Assert.ThrowsAsync<NotFoundException>(() => _handler.Handle(command, CancellationToken.None));
+    }
+}{{/Entity}}

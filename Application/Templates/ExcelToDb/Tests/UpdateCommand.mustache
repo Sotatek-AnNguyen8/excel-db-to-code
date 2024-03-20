@@ -1,0 +1,54 @@
+using System.Linq.Expressions;
+using {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
+using Application.Common.Exceptions;
+using {{EntityNamespace}};
+using FluentAssertions;
+using {{TestNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Builders;
+using Moq;
+using Shared.Constants;
+using UnitTest.Application.Catalog;
+
+namespace {{TestNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
+
+{{#Entity}}
+public class Update{{Name}}CommandTest : MockGenericRepositoryTestBase<{{Name}}>
+{
+    private readonly Update{{Name}}CommandHandler _handler;
+
+    public Update{{Name}}CommandTest()
+    {
+        _handler = new Update{{Name}}CommandHandler(UnitOfWork);
+    }
+
+    [Fact]
+    public async Task HandleValidCommandShouldUpdate{{Name}}()
+    {
+        var request = new {{Name}}Builder()
+            .WithId(1)
+            .Build();
+
+        mockRepository.Setup(repo => repo.GetFirstOrDefaultAsync(
+                It.IsAny<Expression<Func<{{Name}}, bool>>>(), null, null, true, false))
+            .ReturnsAsync(request);
+
+        var command = new Update{{Name}}Command { {{ParamInit}} };
+
+        var response = await _handler.Handle(command, CancellationToken.None);
+
+        mockRepository.Verify(repo => repo.Update(It.IsAny<{{Name}}>()), Times.Once);
+        response.Should().NotBeNull();
+        response.Message.Should().Be(MessageCommon.UpdateSuccess);
+    }
+
+    [Fact]
+    public async Task HandleNonExistShouldThrowNotFoundException()
+    {
+        mockRepository.Setup(repo => repo.GetFirstOrDefaultAsync(
+                It.IsAny<Expression<Func<{{Name}}, bool>>>(), null, null, true, false))
+            .ReturnsAsync(({{Name}}?)null);
+
+        var command = new Update{{Name}}Command { Id = 99 };
+
+        await Assert.ThrowsAsync<NotFoundException>(() => _handler.Handle(command, CancellationToken.None));
+    }
+}{{/Entity}}
