@@ -2,6 +2,7 @@ using Application.Common.Models;
 using Application.Common.Persistence;
 using Application.Common.Responses;
 using {{DtoNamespace}};
+using {{ParamNamespace}};
 using Ardalis.Specification;
 using Domain.Common;
 using {{EntityNamespace}};
@@ -9,6 +10,7 @@ using MediatR;
 
 namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Queries;
 
+{{#Entity}}
 public class Get{{Name}}ByConditionQuery : Search{{Name}}Param, IRequest<ResponseBase<PaginationResponse<{{Name}}Dto>>>;
 
 public sealed class {{Name}}Spec : Specification<{{Name}}, {{Name}}Dto>, ISingleResultSpecification<{{Name}}>

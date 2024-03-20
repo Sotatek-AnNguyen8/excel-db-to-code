@@ -38,9 +38,9 @@ public class Update{{Name}}CommandHandler(IUnitOfWork unitOfWork) : IRequestHand
     {
         var {{VarName}} = await _{{VarName}}Repository.GetFirstOrDefaultAsync(predicate: x => x.Id == request.Id, disableTracking: false)
             ?? throw new NotFoundException(MessageCommon.SetEntityNotFound(nameof({{Name}}), request.Id));
-    
+
         {{VarName}}.Update({{Params}});
-    
+
         _{{VarName}}Repository.Update({{VarName}});
         await unitOfWork.SaveChangesAsync();
 

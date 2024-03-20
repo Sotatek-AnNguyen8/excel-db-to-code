@@ -8,6 +8,7 @@ namespace Application.Models;
 public enum ExcelDbEntityFieldType
 {
     Number,
+    Decimal,
     Varchar,
     Timestamp,
     DateTime,
@@ -353,6 +354,7 @@ public class ExcelDbObject
         {
             ExcelDbEntityFieldType.Varchar => "string",
             ExcelDbEntityFieldType.Number => "int",
+            ExcelDbEntityFieldType.Decimal => "double",
             ExcelDbEntityFieldType.Timestamp => "DateTimeOffset",
             ExcelDbEntityFieldType.DateTime => "DateTime",
             ExcelDbEntityFieldType.Enum => field.EnumType!.DisplayName,
@@ -381,6 +383,8 @@ public class ExcelDbObject
             case ExcelDbEntityFieldType.Number:
             case ExcelDbEntityFieldType.Timestamp:
             case ExcelDbEntityFieldType.DateTime:
+            case ExcelDbEntityFieldType.Decimal:
+            case ExcelDbEntityFieldType.Enum:
             default:
                 break;
         }
@@ -410,7 +414,7 @@ public class ExcelDbObject
         }
 
         return $$"""
-                         if (status != null)
+                         if ({{varName}} != null)
                          {
                              Query.Where({{varAbbr}} => {{varAbbr}}.{{field.Name}} != {{varName}});
                          }
