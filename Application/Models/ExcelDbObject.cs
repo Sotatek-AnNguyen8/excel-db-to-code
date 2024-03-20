@@ -165,6 +165,13 @@ public class ExcelDbObject
                 string.Join(", ",
                     entityFields.Select(
                         f => $"{f.Name} = request.{f.Name}"))
+            },
+            {
+                "CreateBody",
+                $"return new {Name}\n{new string(' ', 8)}{{\n"
+                + string.Join(",\n",
+                    entityFields.Select(f => $"{new string(' ', 12)}{f.Name} = {f.Name.ToVariableCase()}"))
+                + $"\n{new string(' ', 8)}}};"
             }
         };
     }

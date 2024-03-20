@@ -116,6 +116,7 @@ public class ExcelToDbScript(IConfiguration config)
         var stubble = new StubbleBuilder().Build();
         string template;
         string updateTemplate;
+        string createTemplate;
 
         using (var sr =
             new StreamReader(
@@ -133,6 +134,14 @@ public class ExcelToDbScript(IConfiguration config)
             updateTemplate = await sr.ReadToEndAsync();
         }
 
+        using (var sr =
+            new StreamReader(
+                Path.Combine(Directory.GetCurrentDirectory(), @"Templates\ExcelToDb\Entity_Create.mustache"),
+                Encoding.UTF8))
+        {
+            createTemplate = await sr.ReadToEndAsync();
+        }
+
         var output = RemoveRedundantLines(await stubble.RenderAsync(template,
             new
             {
@@ -141,7 +150,8 @@ public class ExcelToDbScript(IConfiguration config)
                 IdType = config["Generated:Entity:IdType"]
             }, new Dictionary<string, string>
             {
-                { "Update", updateTemplate }
+                { "Update", updateTemplate },
+                { "Create", createTemplate }
             }));
 
         var folderPath = Path.Combine(_pathGeneration, "Entities", $"{objDict.GetValueOrDefault("Name")}.cs");
@@ -184,7 +194,7 @@ public class ExcelToDbScript(IConfiguration config)
 
     private async Task GenerateCqrs(Dictionary<string, object> objDict)
     {
-        var name = (string) objDict.GetValueOrDefault("Name")!;
+        var name = (string)objDict.GetValueOrDefault("Name")!;
         var pluralName = name.Pluralize();
         var view = new
         {

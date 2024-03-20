@@ -14,5 +14,7 @@ public class {{#Entity}}{{Name}}{{/Entity}} : AuditableEntity<{{IdType}}>, IAggr
     public {{Type}}{{^IsRequired}}?{{/IsRequired}} {{Name}} { get; set; }{{#HasDefaultValue}} = {{DefaultValue}};{{/HasDefaultValue}}
 
 {{/EntityFields}}
+{{> Create }}
+
 {{> Update }}
 }{{/Entity}}

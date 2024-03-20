@@ -1,6 +1,5 @@
-using Application.Common.Repositories;
+using Application.Common.Persistence;
 using Application.Common.Responses;
-using Application.Common.UnitOfWork;
 using {{ValidationNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}};
 using Domain.Common;
 using {{EntityNamespace}};
@@ -26,18 +25,12 @@ public class Create{{Name}}CommandValidator : AbstractValidator<Create{{Name}}Co
     }
 }
 
-public class Create{{Name}}CommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<Create{{Name}}Command, ResponseBase<{{Name}}>>
+public class Create{{Name}}CommandHandler(IRepository<{{Name}}> {{VarName}}Repository) : IRequestHandler<Create{{Name}}Command, ResponseBase<{{Name}}>>
 {
-    private readonly IRepository<{{Name}}> _{{VarName}}Repository = unitOfWork.GetRepository<{{Name}}>();
-
     public async Task<ResponseBase<{{Name}}>> Handle(Create{{Name}}Command request, CancellationToken cancellationToken)
     {
-        var entityEntry = await _{{VarName}}Repository.InsertAsync(new {{Name}} { {{ParamInit}} }, cancellationToken);
+        var result = await {{VarName}}Repository.AddAsync({{Name}}.Create({{Params}}), cancellationToken);
 
-        await unitOfWork.SaveChangesAsync();
-
-        var created{{Name}} = entityEntry.Entity;
-
-        return new ResponseBase<{{Name}}>(created{{Name}}, MessageCommon.CreateSuccess);
+        return new ResponseBase<{{Name}}>(result, MessageCommon.CreateSuccess);
     }
 }{{/Entity}}
