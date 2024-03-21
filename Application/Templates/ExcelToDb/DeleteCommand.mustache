@@ -30,7 +30,7 @@ public class Delete{{Name}}CommandHandler(IUnitOfWork unitOfWork) : IRequestHand
 
     public async Task<ResponseBase<bool>> Handle(Delete{{Name}}Command request, CancellationToken cancellationToken)
     {
-        var {{VarName}} = await _{{VarName}}Repository.GetFirstOrDefaultAsync(predicate: x => x.Id == request.Id, disableTracking: false)
+        var {{VarName}} = await _{{VarName}}Repository.GetFirstOrDefaultAsync(predicate: x => x.Id == request.Id)
             ?? throw new NotFoundException(MessageCommon.SetEntityNotFound(nameof({{Name}}), request.Id));
 
         _{{VarName}}Repository.Delete({{VarName}});

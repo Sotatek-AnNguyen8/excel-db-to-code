@@ -26,7 +26,7 @@ public class Delete{{Name}}CommandTest : MockGenericRepositoryTestBase<{{Name}}>
             .Build();
 
         mockRepository.Setup(repo => repo.GetFirstOrDefaultAsync(
-                It.IsAny<Expression<Func<{{Name}}, bool>>>(), null, null, false, false))
+                It.IsAny<Expression<Func<{{Name}}, bool>>>(), null, null, true, false))
             .ReturnsAsync({{VarName}});
 
         var command = new Delete{{Name}}Command { Id = 1 };
@@ -41,7 +41,7 @@ public class Delete{{Name}}CommandTest : MockGenericRepositoryTestBase<{{Name}}>
     public async Task HandleNonExistShouldThrowNotFoundException()
     {
         mockRepository.Setup(repo => repo.GetFirstOrDefaultAsync(
-                It.IsAny<Expression<Func<{{Name}}, bool>>>(), null, null, false, false))
+                It.IsAny<Expression<Func<{{Name}}, bool>>>(), null, null, true, false))
             .ReturnsAsync(({{Name}}?)null);
 
         var command = new Delete{{Name}}Command { Id = 99 };

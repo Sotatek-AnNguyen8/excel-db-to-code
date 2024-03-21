@@ -429,6 +429,7 @@ public class ExcelDbObject
         {
             case ExcelDbEntityFieldType.Varchar:
             case ExcelDbEntityFieldType.Number:
+            case ExcelDbEntityFieldType.Boolean:
             case ExcelDbEntityFieldType.Int:
             case ExcelDbEntityFieldType.Decimal:
                 return $"{type} {field.Name.ToVariableCase()} = It.IsAny<{type}>();";
@@ -436,7 +437,6 @@ public class ExcelDbObject
             case ExcelDbEntityFieldType.Timestamp:
             case ExcelDbEntityFieldType.DateTime:
             case ExcelDbEntityFieldType.Enum:
-            case ExcelDbEntityFieldType.Boolean:
             default:
                 return $"var {field.Name.ToVariableCase()} = It.IsAny<{type}>();";
         }
