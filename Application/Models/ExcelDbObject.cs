@@ -14,7 +14,8 @@ public enum ExcelDbEntityFieldType
     Varchar,
     Timestamp,
     DateTime,
-    Enum
+    Enum,
+    Boolean
 }
 
 public class ExcelDbEntityField
@@ -257,11 +258,15 @@ public class ExcelDbObject
             var isPrimaryKey = !row.Cell(_cPrimaryKey).Value.IsBlank;
             var isLookup = !row.Cell(_cLookup).Value.IsBlank;
             var isNullable = row.Cell(_cNullable).Value.IsBlank;
-            dynamic defaultValue = cDefaultValueValue.IsBlank
-                ? string.Empty
-                : cDefaultValueValue.IsText
-                    ? cDefaultValueValue.GetText()
-                    : cDefaultValueValue.GetNumber();
+            dynamic defaultValue = cDefaultValueValue.Type switch
+            {
+                XLDataType.Blank => string.Empty,
+                XLDataType.Boolean => cDefaultValueValue.GetBoolean(),
+                XLDataType.Number => cDefaultValueValue.GetNumber(),
+                XLDataType.Text => cDefaultValueValue.GetText(),
+                _ => throw new ArgumentOutOfRangeException(nameof(cDefaultValueValue.Type),
+                    "Invalid value of cell \"default value\"")
+            };
             var type = enumType != null
                 ? ExcelDbEntityFieldType.Enum
                 : row.Cell(_cType).Value.GetText().ToEnum<ExcelDbEntityFieldType>();
@@ -295,8 +300,8 @@ public class ExcelDbObject
         while (currRow > 0 && !ws.Cell(currRow, _cEnumNo).Value.IsBlank)
         {
             var row = ws.Row(currRow);
-
-            var enumName = row.Cell(_cEnumNo).Value.GetText().ToLower().Dehumanize();
+            var enumName = Regex.Replace(row.Cell(_cEnumNo).Value.GetText(), "/", " ")
+                .ToLower().Dehumanize();
 
             var @enum = new ExcelDbEntityEnum
             {
@@ -373,6 +378,7 @@ public class ExcelDbObject
             ExcelDbEntityFieldType.Timestamp => "DateTimeOffset",
             ExcelDbEntityFieldType.DateTime => "DateTime",
             ExcelDbEntityFieldType.Enum => field.EnumType!.DisplayName,
+            ExcelDbEntityFieldType.Boolean => "bool",
             _ => throw new Exception($"Unhandled type: {field}")
         };
     }
@@ -400,6 +406,8 @@ public class ExcelDbObject
             case ExcelDbEntityFieldType.DateTime:
             case ExcelDbEntityFieldType.Decimal:
             case ExcelDbEntityFieldType.Enum:
+            case ExcelDbEntityFieldType.Int:
+            case ExcelDbEntityFieldType.Boolean:
             default:
                 break;
         }
@@ -428,6 +436,7 @@ public class ExcelDbObject
             case ExcelDbEntityFieldType.Timestamp:
             case ExcelDbEntityFieldType.DateTime:
             case ExcelDbEntityFieldType.Enum:
+            case ExcelDbEntityFieldType.Boolean:
             default:
                 return $"var {field.Name.ToVariableCase()} = It.IsAny<{type}>();";
         }
