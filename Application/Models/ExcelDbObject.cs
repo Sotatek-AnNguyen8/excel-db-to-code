@@ -1,4 +1,5 @@
-﻿using Application.Extensions;
+﻿using System.Text.RegularExpressions;
+using Application.Extensions;
 using ClosedXML.Excel;
 using Humanizer;
 using Microsoft.Extensions.Configuration;
@@ -143,7 +144,7 @@ public class ExcelDbObject
             {
                 "Arguments",
                 string.Join(", ",
-                    entityFields.Select(f => $"{GetType(f)} {f.Name.ToVariableCase()}"))
+                    entityFields.Select(f => $"{GetType(f)}{(f.IsNullable ? "?" : "")} {f.Name.ToVariableCase()}"))
             },
             {
                 "NullableArguments",
@@ -268,7 +269,7 @@ public class ExcelDbObject
             fields.Add(new ExcelDbEntityField
             {
                 Index = index,
-                Name = name,
+                Name = Regex.Replace(name, "/", " ").Dehumanize(),
                 Description = description,
                 IsPrimaryKey = isPrimaryKey,
                 IsLookup = isLookup,
@@ -308,8 +309,13 @@ public class ExcelDbObject
             while (!ws.Cell(currRow, _cEnumNo).Value.IsBlank)
             {
                 row = ws.Row(currRow);
+                var descriptionValue = row.Cell(_cEnumDescription).Value;
+                if (descriptionValue.IsBlank)
+                {
+                    currRow++;
+                }
 
-                var name = row.Cell(_cEnumDescription).Value.GetText().ToLower().Dehumanize();
+                var name = descriptionValue.GetText().ToLower().Dehumanize();
                 var value = (int)row.Cell(_cEnumValue).Value.GetNumber();
 
                 @enum.Values.Add(KeyValuePair.Create(name, value));

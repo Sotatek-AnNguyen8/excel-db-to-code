@@ -28,10 +28,10 @@ public class Update{{Name}}CommandTest : MockGenericRepositoryTestBase<{{Name}}>
             .Build();
 
         mockRepository.Setup(repo => repo.GetFirstOrDefaultAsync(
-                It.IsAny<Expression<Func<{{Name}}, bool>>>(), null, null, true, false))
+                It.IsAny<Expression<Func<{{Name}}, bool>>>(), null, null, false, false))
             .ReturnsAsync(request);
 
-        var command = new Update{{Name}}Command { {{ParamInit}} };
+        var command = new Update{{Name}}Command { Id = 1, {{ParamInit}} };
 
         var response = await _handler.Handle(command, CancellationToken.None);
 
@@ -44,7 +44,7 @@ public class Update{{Name}}CommandTest : MockGenericRepositoryTestBase<{{Name}}>
     public async Task HandleNonExistShouldThrowNotFoundException()
     {
         mockRepository.Setup(repo => repo.GetFirstOrDefaultAsync(
-                It.IsAny<Expression<Func<{{Name}}, bool>>>(), null, null, true, false))
+                It.IsAny<Expression<Func<{{Name}}, bool>>>(), null, null, false, false))
             .ReturnsAsync(({{Name}}?)null);
 
         var command = new Update{{Name}}Command { Id = 99 };
