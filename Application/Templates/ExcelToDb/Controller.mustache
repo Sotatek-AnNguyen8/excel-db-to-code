@@ -34,16 +34,11 @@ public class {{Name}}Controller : VersionedApiController
         return Ok(result);
     }
 
-    [HttpGet]
+    [HttpPost("search")]
     [OpenApiOperation("Get {{NamePluralHumanize}} by conditions", "")]
-    public async Task<IActionResult> GetAsync([FromQuery] Search{{Name}}Param request)
+    public async Task<IActionResult> GetAsync(Get{{Name}}ByConditionQuery request)
     {
-        var result = await Mediator.Send(new Get{{Name}}ByConditionQuery
-        {
-            {{ParamInit}},
-            PageNumber = request.PageNumber,
-            PageSize = request.PageSize
-        });
+        var result = await Mediator.Send(request);
         return Ok(result);
     }
 
