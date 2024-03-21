@@ -9,6 +9,7 @@ namespace Application.Models;
 public enum ExcelDbEntityFieldType
 {
     Number,
+    Int,
     Decimal,
     Varchar,
     Timestamp,
@@ -313,6 +314,7 @@ public class ExcelDbObject
                 if (descriptionValue.IsBlank)
                 {
                     currRow++;
+                    continue;
                 }
 
                 var name = descriptionValue.GetText().ToLower().Dehumanize();
@@ -366,6 +368,7 @@ public class ExcelDbObject
         {
             ExcelDbEntityFieldType.Varchar => "string",
             ExcelDbEntityFieldType.Number => "int",
+            ExcelDbEntityFieldType.Int => "int",
             ExcelDbEntityFieldType.Decimal => "double",
             ExcelDbEntityFieldType.Timestamp => "DateTimeOffset",
             ExcelDbEntityFieldType.DateTime => "DateTime",
@@ -418,6 +421,7 @@ public class ExcelDbObject
         {
             case ExcelDbEntityFieldType.Varchar:
             case ExcelDbEntityFieldType.Number:
+            case ExcelDbEntityFieldType.Int:
             case ExcelDbEntityFieldType.Decimal:
                 return $"{type} {field.Name.ToVariableCase()} = It.IsAny<{type}>();";
 
