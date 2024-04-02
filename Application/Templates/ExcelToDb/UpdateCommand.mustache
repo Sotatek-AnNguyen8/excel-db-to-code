@@ -25,6 +25,7 @@ public class Update{{Name}}CommandValidator : AbstractValidator<Update{{Name}}Co
     public Update{{Name}}CommandValidator()
     {
         RuleFor(p => p.Id)
+        .GreaterThan(0)
             .NotEmpty();
         {{Name}}Validator.ApplyRules(this);
     }

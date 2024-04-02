@@ -20,6 +20,7 @@ public class Delete{{Name}}CommandValidator : AbstractValidator<Delete{{Name}}Co
     public Delete{{Name}}CommandValidator()
     {
         RuleFor(p => p.Id)
+            .GreaterThan(0)
             .NotEmpty();
     }
 }

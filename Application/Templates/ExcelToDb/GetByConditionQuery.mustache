@@ -1,8 +1,10 @@
 using Application.Common.Models;
 using Application.Common.Persistence;
 using Application.Common.Responses;
+using Application.Common.Specification;
 using {{DtoNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}};
 using {{ParamNamespace}};
+using Application.Services;
 using Ardalis.Specification;
 using Domain.Common;
 using {{EntityNamespace}};
@@ -13,21 +15,20 @@ namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Queries;
 {{#Entity}}
 public class Get{{Name}}ByConditionQuery : Search{{Name}}Param, IRequest<ResponseBase<PaginationResponse<{{Name}}Dto>>>;
 
-public sealed class {{Name}}Spec : Specification<{{Name}}, {{Name}}Dto>, ISingleResultSpecification<{{Name}}>
+public sealed class {{Name}}Spec : EntitiesByPaginationFilterSpec<{{Name}}, {{Name}}Dto>, ISingleResultSpecification<{{Name}}>
 {
-    public {{Name}}Spec({{NullableArguments}})
+    public {{Name}}Spec(Get{{Name}}ByConditionQuery request) : base(request)
     {
 {{{ParamValidation}}}
     }
 }
 
-public class Get{{Name}}ByConditionQueryHandler(IRepository<{{Name}}> {{VarName}}Repository) : IRequestHandler<Get{{Name}}ByConditionQuery, ResponseBase<PaginationResponse<{{Name}}Dto>>>
+public class Get{{Name}}ByConditionQueryHandler(IRepository<{{Name}}> {{VarName}}Repository, IPaginationService paginationService) : IRequestHandler<Get{{Name}}ByConditionQuery, ResponseBase<PaginationResponse<{{Name}}Dto>>>
 {
     public async Task<ResponseBase<PaginationResponse<{{Name}}Dto>>> Handle(Get{{Name}}ByConditionQuery request, CancellationToken cancellationToken)
     {
-        var spec = new {{Name}}Spec({{Params}});
-
-        return new ResponseBase<PaginationResponse<{{Name}}Dto>>(await {{VarName}}Repository
-            .PaginatedListAsync(spec, request.PageNumber, request.PageSize, cancellationToken));
+        var spec = new {{Name}}Spec(request);
+        var {{VarName}} = await paginationService.PaginatedListAsync(bankMasterRepository, spec, request.PageNumber, request.PageSize, cancellationToken);
+        return new ResponseBase<PaginationResponse<{{Name}}Dto>>({{VarName}});
     }
 }{{/Entity}}

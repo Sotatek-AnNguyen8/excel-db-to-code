@@ -149,11 +149,6 @@ public class ExcelDbObject
                     entityFields.Select(f => $"{GetType(f)}{(f.IsNullable ? "?" : "")} {f.Name.ToVariableCase()}"))
             },
             {
-                "NullableArguments",
-                string.Join(", ",
-                    entityFields.Select(f => $"{GetType(f)}? {f.Name.ToVariableCase()}"))
-            },
-            {
                 "Params",
                 string.Join(", ",
                     entityFields.Select(f => $"request.{f.Name}"))
@@ -444,24 +439,25 @@ public class ExcelDbObject
 
     private static string GetParamValidation(ExcelDbEntityField field)
     {
-        var varName = field.Name.ToVariableCase();
-        var varAbbr = varName[0];
+        var varAbbr = field.Name.ToVariableCase()[0];
 
         if (field.Type == ExcelDbEntityFieldType.Varchar)
         {
             return $$"""
-                             if (!string.IsNullOrEmpty({{varName}}))
+                             if (!string.IsNullOrEmpty(request.{{field.Name}}))
                              {
-                                 Query.Where({{varAbbr}} => {{varAbbr}}.{{field.Name}}.Contains({{varName}}));
+                                 Query.Where({{varAbbr}} => {{varAbbr}}.{{field.Name}}.Contains(request.{{field.Name}}, StringComparison.CurrentCultureIgnoreCase));
                              }
+
                      """;
         }
 
         return $$"""
-                         if ({{varName}} != null)
+                         if (request.{{field.Name}} != null)
                          {
-                             Query.Where({{varAbbr}} => {{varAbbr}}.{{field.Name}} != {{varName}});
+                             Query.Where({{varAbbr}} => {{varAbbr}}.{{field.Name}} != request.{{field.Name}});
                          }
+
                  """;
     }
 }
