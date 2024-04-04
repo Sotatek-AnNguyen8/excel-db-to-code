@@ -395,6 +395,11 @@ public class ExcelDbObject
                     validations.Add($"MaximumLength({field.Length})");
                 }
 
+                if (field.Name.Contains("email", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    validations.Add("EmailAddress()");
+                }
+
                 break;
             case ExcelDbEntityFieldType.Number:
             case ExcelDbEntityFieldType.Timestamp:
@@ -446,7 +451,7 @@ public class ExcelDbObject
             return $$"""
                              if (!string.IsNullOrEmpty(request.{{field.Name}}))
                              {
-                                 Query.Where({{varAbbr}} => {{varAbbr}}.{{field.Name}}.Contains(request.{{field.Name}}, StringComparison.CurrentCultureIgnoreCase));
+                                 Query.Where({{varAbbr}} => {{varAbbr}}.{{field.Name}}.ToLower().Contains(request.{{field.Name}}.ToLower()));
                              }
 
                      """;
@@ -455,7 +460,7 @@ public class ExcelDbObject
         return $$"""
                          if (request.{{field.Name}} != null)
                          {
-                             Query.Where({{varAbbr}} => {{varAbbr}}.{{field.Name}} != request.{{field.Name}});
+                             Query.Where({{varAbbr}} => {{varAbbr}}.{{field.Name}} == request.{{field.Name}});
                          }
 
                  """;
