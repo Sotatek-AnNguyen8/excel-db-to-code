@@ -28,7 +28,7 @@ public class Get{{Name}}ByConditionQueryHandler(IRepository<{{Name}}> {{VarName}
     public async Task<ResponseBase<PaginationResponse<{{Name}}Dto>>> Handle(Get{{Name}}ByConditionQuery request, CancellationToken cancellationToken)
     {
         var spec = new {{Name}}Spec(request);
-        var {{VarName}} = await paginationService.PaginatedListAsync(bankMasterRepository, spec, request.PageNumber, request.PageSize, cancellationToken);
+        var {{VarName}} = await paginationService.PaginatedListAsync({{VarName}}Repository, spec, request.PageNumber, request.PageSize, cancellationToken);
         return new ResponseBase<PaginationResponse<{{Name}}Dto>>({{VarName}});
     }
 }{{/Entity}}
