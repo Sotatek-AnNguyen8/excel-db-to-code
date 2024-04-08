@@ -9,7 +9,7 @@ using UnitTest.Application.Catalog;
 namespace {{TestNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
 
 {{#Entity}}
-public class Delete{{Name}}CommandTest : MockGenericRepositoryTestBase<{{Name}}>
+public class Delete{{Name}}CommandTest : MockRepositoryTestBase<{{Name}}>
 {
     private readonly Delete{{Name}}CommandHandler _handler;
 

@@ -221,7 +221,7 @@ public class ExcelToDbScript(IConfiguration config)
             Tuple.Create("UpdateCommand", $@"Cqrs\{pluralName}\Commands", $"Update{name}Command.cs"),
             Tuple.Create("DeleteCommand", $@"Cqrs\{pluralName}\Commands", $"Delete{name}Command.cs"),
             Tuple.Create("BaseCommand", $@"Cqrs\Validation\{pluralName}", $"I{name}Command.cs"),
-            Tuple.Create("Validation", $@"Cqrs\Validation\{pluralName}", $"{name}ValidationRules.cs"),
+            Tuple.Create("Validation", $@"Cqrs\Validation\{pluralName}", $"{name}Validator.cs"),
             Tuple.Create("SearchParam", $@"Cqrs\{pluralName}", $"Search{name}Param.cs")
         ];
 

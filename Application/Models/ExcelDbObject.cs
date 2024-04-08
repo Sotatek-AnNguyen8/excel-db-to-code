@@ -296,12 +296,12 @@ public class ExcelDbObject
         {
             var row = ws.Row(currRow);
             var enumName = Regex.Replace(row.Cell(_cEnumNo).Value.GetText(), "/", " ")
-                .ToLower().Dehumanize();
+                .ToLower().Titleize().Dehumanize();
 
             var @enum = new ExcelDbEntityEnum
             {
                 Name = enumName,
-                DisplayName = objectName + enumName,
+                DisplayName = objectName.Replace("Master", "") + enumName,
                 Values = []
             };
 
@@ -369,7 +369,7 @@ public class ExcelDbObject
             ExcelDbEntityFieldType.Varchar => "string",
             ExcelDbEntityFieldType.Number => "int",
             ExcelDbEntityFieldType.Int => "int",
-            ExcelDbEntityFieldType.Decimal => "double",
+            ExcelDbEntityFieldType.Decimal => "decimal",
             ExcelDbEntityFieldType.Timestamp => "DateTimeOffset",
             ExcelDbEntityFieldType.DateTime => "DateTime",
             ExcelDbEntityFieldType.Enum => field.EnumType!.DisplayName,

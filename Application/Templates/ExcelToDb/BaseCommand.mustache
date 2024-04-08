@@ -6,6 +6,6 @@ namespace {{ValidationNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}};
 public interface I{{Name}}Command
 {
 {{#EntityFields}}
-    public {{Type}}{{^IsRequired}}?{{/IsRequired}} {{Name}} { get; set; }
+    {{Type}}{{^IsRequired}}?{{/IsRequired}} {{Name}} { get; set; }
 {{/EntityFields}}
 }{{/Entity}}

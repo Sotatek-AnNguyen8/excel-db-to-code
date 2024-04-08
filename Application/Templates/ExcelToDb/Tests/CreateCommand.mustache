@@ -2,19 +2,22 @@ using {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
 using Domain.Common;
 using {{EntityNamespace}};
 using Shared.Constants;
-using UnitTest.Application.Catalog;
 
 namespace {{TestNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
 
 {{#Entity}}
 public class Create{{Name}}CommandTest : MockRepositoryTestBase<{{Name}}>
 {
+    private readonly Create{{Name}}CommandHandler _handler;
+
+    public Create{{Name}}CommandTest()
+    {
+        _handler = new Create{{Name}}CommandHandler(UnitOfWork);
+    }
+
     [Fact]
     public async Task HandleValidCommandShouldCreate{{Name}}()
     {
-        mockRepository.Setup(repo => repo.AddAsync(It.IsAny<{{Name}}>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(({{Name}} {{VarName}}, CancellationToken _) => {{VarName}});
-
 {{#EntityFields}}
         {{{Mock}}}
 {{/EntityFields}}
@@ -24,12 +27,10 @@ public class Create{{Name}}CommandTest : MockRepositoryTestBase<{{Name}}>
 {{ParamInitNonObject}}
         };
 
-        var handler = new Create{{Name}}CommandHandler(mockRepository.Object);
+        await _handler.Handle(command, CancellationToken.None);
 
-        var response = await handler.Handle(command, CancellationToken.None);
-
-        mockRepository.Verify(repo => repo.AddAsync(It.IsAny<{{Name}}>(), It.IsAny<CancellationToken>()), Times.Once);
-        response.Should().NotBeNull();
-        response.Message.Should().Be(MessageCommon.CreateSuccess);
+        mockRepository.Verify(
+            repo => repo.InsertAsync(It.IsAny<{{Name}}>(), It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 }{{/Entity}}

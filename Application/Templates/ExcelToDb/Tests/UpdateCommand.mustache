@@ -9,7 +9,7 @@ using UnitTest.Application.Catalog;
 namespace {{TestNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
 
 {{#Entity}}
-public class Update{{Name}}CommandTest : MockGenericRepositoryTestBase<{{Name}}>
+public class Update{{Name}}CommandTest : MockRepositoryTestBase<{{Name}}>
 {
     private readonly Update{{Name}}CommandHandler _handler;
 
