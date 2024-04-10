@@ -14,7 +14,7 @@ public class Get{{Name}}ByIdQuery : IRequest<ResponseBase<{{Name}}Dto>>
     public {{IdType}} Id { get; init; }
 }
 
-public class Get{{Name}}ByIdQueryHandler(IRepository<{{Name}}> {{VarName}}Repository) : IRequestHandler<Get{{Name}}ByIdQuery, ResponseBase<{{Name}}Dto>>
+public class Get{{Name}}ByIdQueryHandler(IReadRepository<{{Name}}> {{VarName}}Repository) : IRequestHandler<Get{{Name}}ByIdQuery, ResponseBase<{{Name}}Dto>>
 {
     public async Task<ResponseBase<{{Name}}Dto>> Handle(Get{{Name}}ByIdQuery request, CancellationToken cancellationToken)
     {

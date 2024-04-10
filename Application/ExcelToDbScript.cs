@@ -175,7 +175,7 @@ public class ExcelToDbScript(IConfiguration config)
 
         using (var sr =
             new StreamReader(
-                Path.Combine(Directory.GetCurrentDirectory(), @"Templates", "ExcelToDb", "Dto.mustache"),
+                Path.Combine(Directory.GetCurrentDirectory(), "Templates", "ExcelToDb", "Dto.mustache"),
                 Encoding.UTF8))
         {
             template = await sr.ReadToEndAsync();
@@ -258,7 +258,7 @@ public class ExcelToDbScript(IConfiguration config)
 
         using (var sr =
             new StreamReader(
-                Path.Combine(Directory.GetCurrentDirectory(), @"Templates", "ExcelToDb", "Controller.mustache"),
+                Path.Combine(Directory.GetCurrentDirectory(), "Templates", "ExcelToDb", "Controller.mustache"),
                 Encoding.UTF8))
         {
             template = await sr.ReadToEndAsync();
@@ -307,7 +307,7 @@ public class ExcelToDbScript(IConfiguration config)
             Tuple.Create("CreateCommand",Path.Combine("Test", "Cqrs", pluralName, "Commands"), $"Create{name}CommandTest.cs"),
             Tuple.Create("UpdateCommand",Path.Combine("Test", "Cqrs", pluralName, "Commands"), $"Update{name}CommandTest.cs"),
             Tuple.Create("DeleteCommand",Path.Combine("Test", "Cqrs", pluralName, "Commands"), $"Delete{name}CommandTest.cs"),
-            Tuple.Create("Builder", Path.Combine("Test", "Cqrs", pluralName, "Builders"), $"{name}Builder.cs"),
+            Tuple.Create("Builder", Path.Combine("Test", "Cqrs", pluralName, "Builders"), $"{name}Builder.cs")
         ];
 
         var stubble = new StubbleBuilder().Build();

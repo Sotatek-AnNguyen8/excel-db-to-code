@@ -23,7 +23,7 @@ public sealed class {{Name}}Spec : EntitiesByPaginationFilterSpec<{{Name}}, {{Na
     }
 }
 
-public class Get{{Name}}ByConditionQueryHandler(IRepository<{{Name}}> {{VarName}}Repository, IPaginationService paginationService) : IRequestHandler<Get{{Name}}ByConditionQuery, ResponseBase<PaginationResponse<{{Name}}Dto>>>
+public class Get{{Name}}ByConditionQueryHandler(IReadRepository<{{Name}}> {{VarName}}Repository, IPaginationService paginationService) : IRequestHandler<Get{{Name}}ByConditionQuery, ResponseBase<PaginationResponse<{{Name}}Dto>>>
 {
     public async Task<ResponseBase<PaginationResponse<{{Name}}Dto>>> Handle(Get{{Name}}ByConditionQuery request, CancellationToken cancellationToken)
     {

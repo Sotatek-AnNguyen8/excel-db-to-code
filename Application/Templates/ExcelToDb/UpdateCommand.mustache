@@ -33,7 +33,7 @@ public class Update{{Name}}CommandValidator : AbstractValidator<Update{{Name}}Co
 
 public class Update{{Name}}CommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<Update{{Name}}Command, ResponseBase<{{Name}}>>
 {
-    private readonly IRepository<{{Name}}> _{{VarName}}Repository = unitOfWork.GetRepository<{{Name}}>();
+    private readonly IWriteRepository<{{Name}}> _{{VarName}}Repository = unitOfWork.GetRepository<{{Name}}>();
 
     public async Task<ResponseBase<{{Name}}>> Handle(Update{{Name}}Command request, CancellationToken cancellationToken)
     {

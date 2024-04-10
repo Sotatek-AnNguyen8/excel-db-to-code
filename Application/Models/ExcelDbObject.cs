@@ -138,6 +138,13 @@ public class ExcelDbObject
                     })
             },
             // Additional
+            { "FieldToCheckCreate", FieldToCheckCreate(entityFields) },
+            { "VarToCheckCreate", entityFields.FirstOrDefault(f => !f.IsNullable)!.Name.ToVariableCase() },
+            {
+                "AssignmentToUpdate", entityFields.Where(f => !f.IsNullable)
+                    .Select(f => GetMock(f, "new" + f.Name.Titleize().Dehumanize()))
+                    .FirstOrDefault()!
+            },
             { "VarName", Name.ToVariableCase() },
             { "NamePlural", Name.Pluralize() },
             { "NamePluralHumanize", OriginName.Pluralize().Humanize(LetterCasing.LowerCase) },
@@ -169,6 +176,10 @@ public class ExcelDbObject
                 "ParamInitNonObject",
                 string.Join(",\n",
                     entityFields.Select(f => $"{new string(' ', 12)}{f.Name} = {f.Name.ToVariableCase()}"))
+            },
+            {
+                "UpdateParamInit",
+                GetUpdateParamInit(entityFields)
             }
         };
     }
@@ -278,7 +289,7 @@ public class ExcelDbObject
                 DefaultValue = defaultValue,
                 Type = type,
                 EnumType = enumType,
-                Length = length,
+                Length = length
             });
 
             currRow++;
@@ -421,7 +432,7 @@ public class ExcelDbObject
                string.Join("", validations.Select(v => $"\n{new string(' ', 12)}.{v}")) + ";";
     }
 
-    private static string GetMock(ExcelDbEntityField field)
+    private static string GetMock(ExcelDbEntityField field, string? varName = null)
     {
         var type = GetType(field);
 
@@ -432,13 +443,13 @@ public class ExcelDbObject
             case ExcelDbEntityFieldType.Boolean:
             case ExcelDbEntityFieldType.Int:
             case ExcelDbEntityFieldType.Decimal:
-                return $"{type} {field.Name.ToVariableCase()} = It.IsAny<{type}>();";
+                return $"{type} {varName ?? field.Name.ToVariableCase()} = TestHelper.Next{type.Titleize()}();";
 
             case ExcelDbEntityFieldType.Timestamp:
             case ExcelDbEntityFieldType.DateTime:
             case ExcelDbEntityFieldType.Enum:
             default:
-                return $"var {field.Name.ToVariableCase()} = It.IsAny<{type}>();";
+                return $"var {varName ?? field.Name.ToVariableCase()} = It.IsAny<{type}>();";
         }
     }
 
@@ -464,5 +475,20 @@ public class ExcelDbObject
                          }
 
                  """;
+    }
+
+    private static string FieldToCheckCreate(List<ExcelDbEntityField> entityFields)
+    {
+        return entityFields.FirstOrDefault(f => !f.IsNullable)!.Name;
+    }
+
+    private static string GetUpdateParamInit(List<ExcelDbEntityField> entityFields)
+    {
+        var fieldToCheckCreate = FieldToCheckCreate(entityFields);
+        return string.Join(",\n",
+            entityFields.Select(f =>
+                $"{new string(' ', 12)}{f.Name} = {(f.Name == fieldToCheckCreate
+                    ? $"new{f.Name}"
+                    : f.Name.ToVariableCase())}"));
     }
 }

@@ -1,22 +1,21 @@
 using {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
-using Domain.Common;
 using {{EntityNamespace}};
 using Shared.Constants;
 
 namespace {{TestNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
 
 {{#Entity}}
-public class Create{{Name}}CommandTest : MockRepositoryTestBase<{{Name}}>
+public class Create{{Name}}CommandTest : MockWriteRepositoryTestBase<{{Name}}>
 {
     private readonly Create{{Name}}CommandHandler _handler;
 
     public Create{{Name}}CommandTest()
     {
-        _handler = new Create{{Name}}CommandHandler(UnitOfWork);
+        _handler = new Create{{Name}}CommandHandler(unitOfWork);
     }
 
     [Fact]
-    public async Task HandleValidCommandShouldCreate{{Name}}()
+    public async Task ShouldCreate()
     {
 {{#EntityFields}}
         {{{Mock}}}
@@ -27,10 +26,11 @@ public class Create{{Name}}CommandTest : MockRepositoryTestBase<{{Name}}>
 {{ParamInitNonObject}}
         };
 
-        await _handler.Handle(command, CancellationToken.None);
+        var response = await _handler.Handle(command, CancellationToken.None);
 
-        mockRepository.Verify(
-            repo => repo.InsertAsync(It.IsAny<{{Name}}>(), It.IsAny<CancellationToken>()),
-            Times.Once);
+        response.Message.Should().Be(MessageCommon.CreateSuccess);
+        (await repository.GetFirstOrDefaultAsync(predicate: s => s.{{FieldToCheckCreate}} == {{VarToCheckCreate}}))
+            .Should()
+            .NotBeNull();
     }
 }{{/Entity}}

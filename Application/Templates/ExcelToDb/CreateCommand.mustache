@@ -28,7 +28,7 @@ public class Create{{Name}}CommandValidator : AbstractValidator<Create{{Name}}Co
 
 public class Create{{Name}}CommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<Create{{Name}}Command, ResponseBase<{{Name}}>>
 {
-    private readonly IRepository<{{Name}}> _{{VarName}}Repository = unitOfWork.GetRepository<{{Name}}>();
+    private readonly IWriteRepository<{{Name}}> _{{VarName}}Repository = unitOfWork.GetRepository<{{Name}}>();
 
     public async Task<ResponseBase<{{Name}}>> Handle(Create{{Name}}Command request, CancellationToken cancellationToken)
     {
