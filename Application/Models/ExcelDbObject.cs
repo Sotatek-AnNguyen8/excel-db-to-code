@@ -15,7 +15,8 @@ public enum ExcelDbEntityFieldType
     Timestamp,
     DateTime,
     Enum,
-    Boolean
+    Boolean,
+    TextArray
 }
 
 public class ExcelDbEntityField
@@ -275,7 +276,10 @@ public class ExcelDbObject
             };
             var type = enumType != null
                 ? ExcelDbEntityFieldType.Enum
-                : row.Cell(_cType).Value.GetText().ToEnum<ExcelDbEntityFieldType>();
+                : row.Cell(_cType).Value.GetText().ToEnum<ExcelDbEntityFieldType>(new()
+                {
+                    { "TEXT []", ExcelDbEntityFieldType.TextArray }
+                });
             double? length = cLengthValue.IsNumber ? cLengthValue.GetNumber() : null;
 
             fields.Add(new ExcelDbEntityField
@@ -385,6 +389,7 @@ public class ExcelDbObject
             ExcelDbEntityFieldType.DateTime => "DateTime",
             ExcelDbEntityFieldType.Enum => field.EnumType!.DisplayName,
             ExcelDbEntityFieldType.Boolean => "bool",
+            ExcelDbEntityFieldType.TextArray => "string[]",
             _ => throw new Exception($"Unhandled type: {field}")
         };
     }
@@ -419,6 +424,7 @@ public class ExcelDbObject
             case ExcelDbEntityFieldType.Enum:
             case ExcelDbEntityFieldType.Int:
             case ExcelDbEntityFieldType.Boolean:
+            case ExcelDbEntityFieldType.TextArray:
             default:
                 break;
         }
@@ -448,6 +454,7 @@ public class ExcelDbObject
             case ExcelDbEntityFieldType.Timestamp:
             case ExcelDbEntityFieldType.DateTime:
             case ExcelDbEntityFieldType.Enum:
+            case ExcelDbEntityFieldType.TextArray:
             default:
                 return $"var {varName ?? field.Name.ToVariableCase()} = It.IsAny<{type}>();";
         }

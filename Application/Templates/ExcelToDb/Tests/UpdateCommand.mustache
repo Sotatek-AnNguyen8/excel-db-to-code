@@ -51,8 +51,6 @@ public class Update{{Name}}CommandTest : MockWriteRepositoryTestBase<{{Name}}>
     public async Task ShouldThrowNotFoundException()
     {
         var command = new Update{{Name}}Command { Id = 99 };
-        int itemsCount = await CountAsync();
-
         await Assert.ThrowsAsync<NotFoundException>(() => _handler.Handle(command, CancellationToken.None));
     }
 }{{/Entity}}

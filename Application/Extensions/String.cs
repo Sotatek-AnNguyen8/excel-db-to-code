@@ -2,8 +2,13 @@
 
 public static class StringExtension
 {
-    public static T ToEnum<T>(this string value)
+    public static T ToEnum<T>(this string value, Dictionary<string, T> mappedTypes)
     {
+        if (mappedTypes.TryGetValue(value, out var result))
+        {
+            return result;
+        }
+
         return (T)Enum.Parse(typeof(T), value, true);
     }
 
