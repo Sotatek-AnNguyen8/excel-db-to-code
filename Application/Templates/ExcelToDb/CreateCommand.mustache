@@ -34,6 +34,8 @@ public class Create{{Name}}CommandHandler(IUnitOfWork unitOfWork) : IRequestHand
     {
         var result = await _{{VarName}}Repository.InsertAsync({{Name}}.Create({{Params}}), cancellationToken);
 
+        await unitOfWork.SaveChangesAsync();
+
         return new ResponseBase<{{Name}}>(result.Entity, MessageCommon.CreateSuccess);
     }
 }{{/Entity}}

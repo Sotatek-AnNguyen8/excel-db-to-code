@@ -14,10 +14,15 @@ namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
 {{#Entity}}
 public class Update{{Name}}Command : IRequest<ResponseBase<{{Name}}>>, I{{Name}}Command
 {
-    public {{IdType}} Id { get; init; }
+    public {{IdType}} Id { get; private set; }
 {{#EntityFields}}
     public {{Type}}{{^IsRequired}}?{{/IsRequired}} {{Name}} { get; set; }{{#HasDefaultValue}} = {{DefaultValue}};{{/HasDefaultValue}}
 {{/EntityFields}}
+
+    public void SetId({{IdType}} id)
+    {
+        Id = id;
+    }
 }
 
 public class Update{{Name}}CommandValidator : AbstractValidator<Update{{Name}}Command>
@@ -37,7 +42,8 @@ public class Update{{Name}}CommandHandler(IUnitOfWork unitOfWork) : IRequestHand
 
     public async Task<ResponseBase<{{Name}}>> Handle(Update{{Name}}Command request, CancellationToken cancellationToken)
     {
-        var {{VarName}} = await _{{VarName}}Repository.GetFirstOrDefaultAsync(predicate: x => x.Id == request.Id, disableTracking: false)
+        var {{VarName}} =
+            await _{{VarName}}Repository.GetFirstOrDefaultAsync(predicate: x => x.Id == request.Id, disableTracking: false)
             ?? throw new NotFoundException(MessageCommon.SetEntityNotFound(nameof({{Name}}), request.Id));
 
         {{VarName}}.Update({{Params}});

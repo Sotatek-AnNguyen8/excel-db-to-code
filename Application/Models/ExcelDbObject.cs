@@ -150,7 +150,13 @@ public class ExcelDbObject
             { "NamePlural", Name.Pluralize() },
             { "NamePluralHumanize", OriginName.Pluralize().Humanize(LetterCasing.LowerCase) },
             { "NameSingularHumanize", OriginName.Humanize(LetterCasing.LowerCase) },
-            { "ParamValidation", string.Join("\n", entityFields.Select(GetParamValidation)) },
+            { "ControllerName", OriginName.Kebaberize()},
+            {
+                "ParamValidation",
+                $"{new string(' ', 8)}Query" +
+                string.Join("", entityFields.Select(f => new string(' ', 12) + GetParamValidation(f))) +
+                ";"
+            },
             {
                 "Arguments",
                 string.Join(", ",
@@ -311,7 +317,10 @@ public class ExcelDbObject
         {
             var row = ws.Row(currRow);
             var enumName = Regex.Replace(row.Cell(_cEnumNo).Value.GetText(), "/", " ")
-                .ToLower().Titleize().Dehumanize();
+                .Humanize()
+                .ToLower()
+                .Titleize()
+                .Dehumanize();
 
             var @enum = new ExcelDbEntityEnum
             {
@@ -466,22 +475,12 @@ public class ExcelDbObject
 
         if (field.Type == ExcelDbEntityFieldType.Varchar)
         {
-            return $$"""
-                             if (!string.IsNullOrEmpty(request.{{field.Name}}))
-                             {
-                                 Query.Where({{varAbbr}} => {{varAbbr}}.{{field.Name}}.ToLower().Contains(request.{{field.Name}}.ToLower()));
-                             }
-
-                     """;
+            return
+                $".Where({varAbbr} => string.IsNullOrEmpty(request.{field.Name}) || {varAbbr}.{field.Name}.ToLower().Contains(request.{field.Name}.ToLower()))";
         }
 
-        return $$"""
-                         if (request.{{field.Name}} != null)
-                         {
-                             Query.Where({{varAbbr}} => {{varAbbr}}.{{field.Name}} == request.{{field.Name}});
-                         }
-
-                 """;
+        return
+            $".Where({varAbbr} => request.{field.Name} == null || {varAbbr}.{field.Name} == request.{field.Name})";
     }
 
     private static string FieldToCheckCreate(List<ExcelDbEntityField> entityFields)

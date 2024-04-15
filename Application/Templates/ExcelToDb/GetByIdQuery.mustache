@@ -1,7 +1,7 @@
+using Application.Common.Exceptions;
 using Application.Common.Persistence;
 using Application.Common.Responses;
 using {{DtoNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}};
-using {{ParamNamespace}};
 using {{EntityNamespace}};
 using Mapster;
 using MediatR;
@@ -18,8 +18,9 @@ public class Get{{Name}}ByIdQueryHandler(IReadRepository<{{Name}}> {{VarName}}Re
 {
     public async Task<ResponseBase<{{Name}}Dto>> Handle(Get{{Name}}ByIdQuery request, CancellationToken cancellationToken)
     {
-        var {{VarName}} = await {{VarName}}Repository.GetByIdAsync(request.Id, cancellationToken);
-        _ = {{VarName}} ?? throw new NotFoundException(MessageCommon.SetEntityNotFound(nameof({{Name}}), request.Id));
+        var {{VarName}} =
+            await {{VarName}}Repository.GetByIdAsync(request.Id, cancellationToken)
+            ?? throw new NotFoundException(MessageCommon.SetEntityNotFound(nameof({{Name}}), request.Id));
         var {{VarName}}Dto = {{VarName}}.Adapt<{{Name}}Dto>();
 
         return new ResponseBase<{{Name}}Dto>({{VarName}}Dto);
