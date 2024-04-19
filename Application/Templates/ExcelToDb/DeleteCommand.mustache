@@ -10,36 +10,38 @@ using Shared.Constants;
 namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
 
 {{#Entity}}
-public class Delete{{Name}}Command : IRequest<ResponseBase<bool>>
+public class Delete{{Name}}Command : IRequest<ResponseBase<IEnumerable<{{IdType}}>>>
 {
-    public {{IdType}} Id { get; init; }
+    public List<{{IdType}}> Ids { get; init; } = new();
 }
 
 public class Delete{{Name}}CommandValidator : AbstractValidator<Delete{{Name}}Command>
 {
     public Delete{{Name}}CommandValidator()
     {
-        RuleFor(p => p.Id)
+        RuleFor(c => c.Ids)
+            .NotEmpty();
+        RuleForEach(c => c.Ids)
             .GreaterThan(0)
             .NotEmpty();
     }
 }
 
-public class Delete{{Name}}CommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<Delete{{Name}}Command, ResponseBase<bool>>
+public class Delete{{Name}}CommandHandler(IUnitOfWork unitOfWork) 
+    : IRequestHandler<Delete{{Name}}Command, ResponseBase<IEnumerable<{{IdType}}>>>
 {
     private readonly IWriteRepository<{{Name}}> _{{VarName}}Repository = unitOfWork.GetRepository<{{Name}}>();
 
-    public async Task<ResponseBase<bool>> Handle(Delete{{Name}}Command request, CancellationToken cancellationToken)
+    public async Task<ResponseBase<IEnumerable<{{IdType}}>>> Handle(
+        Delete{{Name}}Command request, CancellationToken cancellationToken)
     {
-        var {{VarName}} =
-            await _{{VarName}}Repository.GetFirstOrDefaultAsync(
-                predicate: x => x.Id == request.Id,
-                disableTracking: false)
-            ?? throw new NotFoundException(MessageCommon.SetEntityNotFound(nameof({{Name}}), request.Id));
+        var toDelete{{NamePlural}} = await _{{VarName}}Repository.GetAllAsync(
+            predicate: a => request.Ids.Contains(a.Id),
+            disableTracking: false);
 
-        _{{VarName}}Repository.Delete({{VarName}});
+        _{{VarName}}Repository.Delete(toDelete{{NamePlural}});
         await unitOfWork.SaveChangesAsync();
 
-        return new ResponseBase<bool>(true, MessageCommon.DeleteSuccess);
+        return new ResponseBase<IEnumerable<{{IdType}}>>(toDelete{{NamePlural}}.Select(a => a.Id), MessageCommon.DeleteSuccess);
     }
 }{{/Entity}}

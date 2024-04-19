@@ -1,5 +1,4 @@
 using {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
-using Application.Common.Exceptions;
 using {{EntityNamespace}};
 using Shared.Constants;
 
@@ -30,7 +29,7 @@ public class Delete{{Name}}CommandTest : MockWriteRepositoryTestBase<{{Name}}>
 
         int id = await repository.GetFirstOrDefaultAsync(predicate: s => s.{{FieldToCheckCreate}} == {{VarToCheckCreate}}, selector: s => s.Id);
 
-        var command = new Delete{{Name}}Command { Id = id };
+        var command = new Delete{{Name}}Command { Ids = new List<{{IdType}}> { id } };
         var response = await _handler.Handle(command, CancellationToken.None);
 
         response.Message.Should().Be(MessageCommon.DeleteSuccess);
@@ -42,10 +41,10 @@ public class Delete{{Name}}CommandTest : MockWriteRepositoryTestBase<{{Name}}>
     [Fact]
     public async Task ShouldThrowNotFoundException()
     {
-        var command = new Delete{{Name}}Command { Id = 99 };
+        var command = new Delete{{Name}}Command { Ids = new List<{{IdType}}> { 99 } };
         int itemsCount = await CountAsync();
+        await _handler.Handle(command, CancellationToken.None);
 
-        await Assert.ThrowsAsync<NotFoundException>(() => _handler.Handle(command, CancellationToken.None));
         (await CountAsync()).Should().Be(itemsCount);
     }
 }{{/Entity}}

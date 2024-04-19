@@ -29,11 +29,11 @@ public class {{Name}}Controller : VersionedApiController
         return Ok(result);
     }
 
-    [HttpDelete("id:{{IdType}}")]
-    [OpenApiOperation("Delete a {{NameSingularHumanize}}", "")]
-    public async Task<IActionResult> DeleteAsync({{IdType}} id)
+    [HttpDelete]
+    [OpenApiOperation("Delete {{NamePluralHumanize}}", "")]
+    public async Task<IActionResult> DeleteAsync(Delete{{Name}}Command request)
     {
-        var result = await Mediator.Send(new Delete{{Name}}Command { Id = id });
+        var result = await Mediator.Send(request);
         return Ok(result);
     }
 
