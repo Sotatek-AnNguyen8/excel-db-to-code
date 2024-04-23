@@ -1,3 +1,4 @@
+using Domain.Common;
 using {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
 using {{EntityNamespace}};
 using Shared.Constants;
@@ -11,7 +12,7 @@ public class Create{{Name}}CommandTest : MockWriteRepositoryTestBase<{{Name}}>
 
     public Create{{Name}}CommandTest()
     {
-        _handler = new Create{{Name}}CommandHandler(unitOfWork);
+        _handler = new Create{{Name}}CommandHandler(UnitOfWork);
     }
 
     [Fact]
@@ -29,7 +30,7 @@ public class Create{{Name}}CommandTest : MockWriteRepositoryTestBase<{{Name}}>
         var response = await _handler.Handle(command, CancellationToken.None);
 
         response.Message.Should().Be(MessageCommon.CreateSuccess);
-        (await repository.GetFirstOrDefaultAsync(predicate: s => s.{{FieldToCheckCreate}} == {{VarToCheckCreate}}))
+        (await Repository.GetFirstOrDefaultAsync(predicate: s => s.{{FieldToCheckCreate}} == {{VarToCheckCreate}}))
             .Should()
             .NotBeNull();
     }

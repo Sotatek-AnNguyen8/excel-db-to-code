@@ -1,3 +1,4 @@
+using Domain.Common;
 using {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
 using {{EntityNamespace}};
 using Shared.Constants;
@@ -11,7 +12,7 @@ public class Delete{{Name}}CommandTest : MockWriteRepositoryTestBase<{{Name}}>
 
     public Delete{{Name}}CommandTest()
     {
-        _handler = new Delete{{Name}}CommandHandler(unitOfWork);
+        _handler = new Delete{{Name}}CommandHandler(UnitOfWork);
     }
 
     [Fact]
@@ -21,19 +22,19 @@ public class Delete{{Name}}CommandTest : MockWriteRepositoryTestBase<{{Name}}>
         {{{Mock}}}
 {{/EntityFields}}
 
-        await repository.InsertAsync(new {{Name}}
+        await Repository.InsertAsync(new {{Name}}
         {
 {{ParamInitNonObject}}
         });
-        await unitOfWork.SaveChangesAsync();
+        await UnitOfWork.SaveChangesAsync();
 
-        int id = await repository.GetFirstOrDefaultAsync(predicate: s => s.{{FieldToCheckCreate}} == {{VarToCheckCreate}}, selector: s => s.Id);
+        int id = await Repository.GetFirstOrDefaultAsync(predicate: {{VarAbbr}} => {{VarAbbr}}.{{FieldToCheckCreate}} == {{VarToCheckCreate}}, selector: {{VarAbbr}} => {{VarAbbr}}.Id);
 
-        var command = new Delete{{Name}}Command { Ids = new List<{{IdType}}> { id } };
+        var command = new Delete{{Name}}Command { Ids = [id] };
         var response = await _handler.Handle(command, CancellationToken.None);
 
         response.Message.Should().Be(MessageCommon.DeleteSuccess);
-        (await repository.GetFirstOrDefaultAsync(predicate: s => s.{{FieldToCheckCreate}} == {{VarToCheckCreate}}))
+        (await Repository.GetFirstOrDefaultAsync(predicate: {{VarAbbr}} => {{VarAbbr}}.{{FieldToCheckCreate}} == {{VarToCheckCreate}}))
             .Should()
             .BeNull();
     }
@@ -41,7 +42,7 @@ public class Delete{{Name}}CommandTest : MockWriteRepositoryTestBase<{{Name}}>
     [Fact]
     public async Task ShouldThrowNotFoundException()
     {
-        var command = new Delete{{Name}}Command { Ids = new List<{{IdType}}> { 99 } };
+        var command = new Delete{{Name}}Command { Ids = [99] };
         int itemsCount = await CountAsync();
         await _handler.Handle(command, CancellationToken.None);
 

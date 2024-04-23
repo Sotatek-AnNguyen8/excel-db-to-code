@@ -7,6 +7,7 @@ using Domain.Common;
 using {{EntityNamespace}};
 using FluentValidation;
 using MediatR;
+using Newtonsoft.Json;
 using Shared.Constants;
 
 namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
@@ -14,7 +15,9 @@ namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
 {{#Entity}}
 public class Update{{Name}}Command : IRequest<ResponseBase<{{Name}}>>, I{{Name}}Command
 {
+    [JsonIgnore]
     public {{IdType}} Id { get; private set; }
+
 {{#EntityFields}}
     public {{Type}}{{^IsRequired}}?{{/IsRequired}} {{Name}} { get; set; }{{#HasDefaultValue}} = {{DefaultValue}};{{/HasDefaultValue}}
 {{/EntityFields}}
@@ -43,7 +46,7 @@ public class Update{{Name}}CommandHandler(IUnitOfWork unitOfWork) : IRequestHand
     public async Task<ResponseBase<{{Name}}>> Handle(Update{{Name}}Command request, CancellationToken cancellationToken)
     {
         var {{VarName}} =
-            await _{{VarName}}Repository.GetFirstOrDefaultAsync(predicate: x => x.Id == request.Id, disableTracking: false)
+            await _{{VarName}}Repository.GetFirstOrDefaultAsync(predicate: {{VarAbbr}} => {{VarAbbr}}.Id == request.Id, disableTracking: false)
             ?? throw new NotFoundException(MessageCommon.SetEntityNotFound(nameof({{Name}}), request.Id));
 
         {{VarName}}.Update({{Params}});

@@ -1,7 +1,6 @@
 using {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Queries;
 using {{EntityNamespace}};
 using {{TestNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Builders;
-using UnitTest.Application.Catalog;
 using Application.Common.Exceptions;
 
 namespace {{TestNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Queries;
@@ -13,7 +12,7 @@ public class Get{{Name}}ByIdQueryTest : MockReadRepositoryTestBase<{{Name}}>
 
     public Get{{Name}}ByIdQueryTest()
     {
-        _handler = new Get{{Name}}ByIdQueryHandler(mockRepository.Object);
+        _handler = new Get{{Name}}ByIdQueryHandler(MockRepository.Object);
     }
 
     [Fact]
@@ -23,7 +22,7 @@ public class Get{{Name}}ByIdQueryTest : MockReadRepositoryTestBase<{{Name}}>
             .WithId(1)
             .Build();
 
-        mockRepository.Setup(repo => repo.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+        MockRepository.Setup(repo => repo.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(expected{{Name}});
 
         var query = new Get{{Name}}ByIdQuery { Id = 1 };
@@ -37,7 +36,7 @@ public class Get{{Name}}ByIdQueryTest : MockReadRepositoryTestBase<{{Name}}>
     [Fact]
     public async Task HandleNonExistingIdShouldThrowNotFoundException()
     {
-        mockRepository.Setup(repo => repo.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+        MockRepository.Setup(repo => repo.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(({{Name}}?)null);
 
         var query = new Get{{Name}}ByIdQuery { Id = 99 };

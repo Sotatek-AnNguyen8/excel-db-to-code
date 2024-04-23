@@ -16,7 +16,8 @@ public enum ExcelDbEntityFieldType
     DateTime,
     Enum,
     Boolean,
-    TextArray
+    TextArray,
+    SmallInt,
 }
 
 public class ExcelDbEntityField
@@ -150,11 +151,12 @@ public class ExcelDbObject
             { "NamePlural", Name.Pluralize() },
             { "NamePluralHumanize", OriginName.Pluralize().Humanize(LetterCasing.LowerCase) },
             { "NameSingularHumanize", OriginName.Humanize(LetterCasing.LowerCase) },
-            { "ControllerName", OriginName.Kebaberize()},
+            { "ControllerName", OriginName.Kebaberize() },
+            { "VarAbbr", GetVarAbbr(Name) },
             {
                 "ParamValidation",
                 $"{new string(' ', 8)}Query" +
-                string.Join("", entityFields.Select(f => new string(' ', 12) + GetParamValidation(f))) +
+                string.Join("", entityFields.Select(f => '\n' + new string(' ', 12) + GetParamValidation(f, Name))) +
                 ";"
             },
             {
@@ -399,6 +401,7 @@ public class ExcelDbObject
             ExcelDbEntityFieldType.Enum => field.EnumType!.DisplayName,
             ExcelDbEntityFieldType.Boolean => "bool",
             ExcelDbEntityFieldType.TextArray => "string[]",
+            ExcelDbEntityFieldType.SmallInt => "short",
             _ => throw new Exception($"Unhandled type: {field}")
         };
     }
@@ -407,9 +410,13 @@ public class ExcelDbObject
     {
         List<string> validations = [];
 
-        if (!field.IsNullable)
+        if (field.Type == ExcelDbEntityFieldType.Varchar)
         {
             validations.Add("NotEmpty()");
+        }
+        else if (!field.IsNullable)
+        {
+            validations.Add("NotNull()");
         }
 
         switch (field.Type)
@@ -434,6 +441,7 @@ public class ExcelDbObject
             case ExcelDbEntityFieldType.Int:
             case ExcelDbEntityFieldType.Boolean:
             case ExcelDbEntityFieldType.TextArray:
+            case ExcelDbEntityFieldType.SmallInt:
             default:
                 break;
         }
@@ -458,6 +466,7 @@ public class ExcelDbObject
             case ExcelDbEntityFieldType.Boolean:
             case ExcelDbEntityFieldType.Int:
             case ExcelDbEntityFieldType.Decimal:
+            case ExcelDbEntityFieldType.SmallInt:
                 return $"{type} {varName ?? field.Name.ToVariableCase()} = TestHelper.Next{type.Titleize()}();";
 
             case ExcelDbEntityFieldType.Timestamp:
@@ -469,9 +478,9 @@ public class ExcelDbObject
         }
     }
 
-    private static string GetParamValidation(ExcelDbEntityField field)
+    private static string GetParamValidation(ExcelDbEntityField field, string entityName)
     {
-        var varAbbr = field.Name.ToVariableCase()[0];
+        var varAbbr = GetVarAbbr(entityName);
 
         if (field.Type == ExcelDbEntityFieldType.Varchar)
         {
@@ -481,6 +490,15 @@ public class ExcelDbObject
 
         return
             $".Where({varAbbr} => request.{field.Name} == null || {varAbbr}.{field.Name} == request.{field.Name})";
+    }
+
+    private static string GetVarAbbr(string entityName)
+    {
+        var humanizeName = entityName.Humanize();
+        return string.Join("", humanizeName.Split(' ')
+                .Select(word => word[0])
+                .Take(3))
+            .ToLower();
     }
 
     private static string FieldToCheckCreate(List<ExcelDbEntityField> entityFields)

@@ -1,3 +1,4 @@
+using Domain.Common;
 using {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
 using Application.Common.Exceptions;
 using {{EntityNamespace}};
@@ -12,7 +13,7 @@ public class Update{{Name}}CommandTest : MockWriteRepositoryTestBase<{{Name}}>
 
     public Update{{Name}}CommandTest()
     {
-        _handler = new Update{{Name}}CommandHandler(unitOfWork);
+        _handler = new Update{{Name}}CommandHandler(UnitOfWork);
     }
 
     [Fact]
@@ -23,26 +24,27 @@ public class Update{{Name}}CommandTest : MockWriteRepositoryTestBase<{{Name}}>
 {{/EntityFields}}
         {{AssignmentToUpdate}}
 
-        await repository.InsertAsync(new {{Name}}
+        await Repository.InsertAsync(new {{Name}}
         {
 {{ParamInitNonObject}}
         });
-        await unitOfWork.SaveChangesAsync();
+        await UnitOfWork.SaveChangesAsync();
 
-        int id = await repository.GetFirstOrDefaultAsync(predicate: s => s.{{FieldToCheckCreate}} == {{VarToCheckCreate}}, selector: s => s.Id);
+        int id = await Repository.GetFirstOrDefaultAsync(predicate: s => s.{{FieldToCheckCreate}} == {{VarToCheckCreate}}, selector: {{VarAbbr}} => {{VarAbbr}}.Id);
 
         var command = new Update{{Name}}Command
         {
-            Id = id,
 {{UpdateParamInit}}
         };
+        command.SetId(id);
+
         var response = await _handler.Handle(command, CancellationToken.None);
 
         response.Message.Should().Be(MessageCommon.UpdateSuccess);
-        (await repository.GetFirstOrDefaultAsync(predicate: s => s.{{FieldToCheckCreate}} == {{VarToCheckCreate}}))
+        (await Repository.GetFirstOrDefaultAsync(predicate: {{VarAbbr}} => {{VarAbbr}}.{{FieldToCheckCreate}} == {{VarToCheckCreate}}))
             .Should()
             .BeNull();
-        (await repository.GetFirstOrDefaultAsync(predicate: s => s.{{FieldToCheckCreate}} == new{{FieldToCheckCreate}}))
+        (await Repository.GetFirstOrDefaultAsync(predicate: {{VarAbbr}} => {{VarAbbr}}.{{FieldToCheckCreate}} == new{{FieldToCheckCreate}}))
             .Should()
             .NotBeNull();
     }
@@ -50,7 +52,8 @@ public class Update{{Name}}CommandTest : MockWriteRepositoryTestBase<{{Name}}>
     [Fact]
     public async Task ShouldThrowNotFoundException()
     {
-        var command = new Update{{Name}}Command { Id = 99 };
+        var command = new Update{{Name}}Command();
+        command.SetId(99);
         await Assert.ThrowsAsync<NotFoundException>(() => _handler.Handle(command, CancellationToken.None));
     }
 }{{/Entity}}

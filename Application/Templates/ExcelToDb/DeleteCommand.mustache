@@ -1,4 +1,3 @@
-using Application.Common.Exceptions;
 using Application.Common.Responses;
 using Application.Common.Repositories;
 using Application.Common.UnitOfWork;
@@ -12,7 +11,7 @@ namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
 {{#Entity}}
 public class Delete{{Name}}Command : IRequest<ResponseBase<IEnumerable<{{IdType}}>>>
 {
-    public List<{{IdType}}> Ids { get; init; } = new();
+    public List<{{IdType}}> Ids { get; init; } = [];
 }
 
 public class Delete{{Name}}CommandValidator : AbstractValidator<Delete{{Name}}Command>
@@ -36,12 +35,12 @@ public class Delete{{Name}}CommandHandler(IUnitOfWork unitOfWork)
         Delete{{Name}}Command request, CancellationToken cancellationToken)
     {
         var toDelete{{NamePlural}} = await _{{VarName}}Repository.GetAllAsync(
-            predicate: a => request.Ids.Contains(a.Id),
+            predicate: {{VarAbbr}} => request.Ids.Contains({{VarAbbr}}.Id),
             disableTracking: false);
 
         _{{VarName}}Repository.Delete(toDelete{{NamePlural}});
         await unitOfWork.SaveChangesAsync();
 
-        return new ResponseBase<IEnumerable<{{IdType}}>>(toDelete{{NamePlural}}.Select(a => a.Id), MessageCommon.DeleteSuccess);
+        return new ResponseBase<IEnumerable<{{IdType}}>>(toDelete{{NamePlural}}.Select({{VarAbbr}} => {{VarAbbr}}.Id), MessageCommon.DeleteSuccess);
     }
 }{{/Entity}}
