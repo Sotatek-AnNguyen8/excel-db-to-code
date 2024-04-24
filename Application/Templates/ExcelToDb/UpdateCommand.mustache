@@ -22,9 +22,10 @@ public class Update{{Name}}Command : IRequest<ResponseBase<{{Name}}>>, I{{Name}}
     public {{Type}}{{^IsRequired}}?{{/IsRequired}} {{Name}} { get; set; }{{#HasDefaultValue}} = {{DefaultValue}};{{/HasDefaultValue}}
 {{/EntityFields}}
 
-    public void SetId({{IdType}} id)
+    public Update{{Name}}Command SetId({{IdType}} id)
     {
         Id = id;
+        return this;
     }
 }
 
@@ -33,7 +34,7 @@ public class Update{{Name}}CommandValidator : AbstractValidator<Update{{Name}}Co
     public Update{{Name}}CommandValidator()
     {
         RuleFor(p => p.Id)
-        .GreaterThan(0)
+            .GreaterThan(0)
             .NotEmpty();
         {{Name}}Validator.ApplyRules(this);
     }
