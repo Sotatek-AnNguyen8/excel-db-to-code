@@ -1,7 +1,7 @@
 using Application.Common.Models;
 using Domain.Common;
 
-namespace {{ParamNamespace}};
+namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Params;
 
 {{#Entity}}
 public class Search{{Name}}Param : PaginationFilter

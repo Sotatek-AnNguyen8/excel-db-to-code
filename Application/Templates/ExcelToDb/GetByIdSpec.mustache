@@ -1,0 +1,14 @@
+using {{DtoNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}};
+using Ardalis.Specification;
+using {{EntityNamespace}};
+
+namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Specs;
+
+{{#Entity}}
+public sealed class {{Name}}ByIdSpec : Specification<{{Name}}, {{Name}}Dto>, ISingleResultSpecification<{{Name}}>
+{
+    public {{Name}}ByIdSpec({{IdType}} id)
+    {
+        Query.Where({{VarAbbr}} => {{VarAbbr}}.Id == id);
+    }
+}{{/Entity}}

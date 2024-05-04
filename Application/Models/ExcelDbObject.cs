@@ -451,7 +451,7 @@ public class ExcelDbObject
             return null;
         }
 
-        return $"{new string(' ', 8)}validator.RuleFor(x => x.{field.Name})" +
+        return $"{new string(' ', 8)}RuleFor(x => x.{field.Name})" +
                string.Join("", validations.Select(v => $"\n{new string(' ', 12)}.{v}")) + ";";
     }
 

@@ -1,0 +1,18 @@
+﻿using {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
+using Application.Common.Validation;
+using FluentValidation;
+
+public class {{Name}}ValidatorBase<TCommand> : CustomValidator<TCommand> where TCommand : {{Name}}BaseCommand
+{
+    protected {{Name}}ValidatorBase()
+    {
+        CommonRules();
+    }
+
+    private void CommonRules()
+    {
+{{#EntityFields}}
+{{{Validation}}}
+{{/EntityFields}}
+    }
+}

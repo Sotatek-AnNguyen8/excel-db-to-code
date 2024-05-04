@@ -98,9 +98,9 @@ public class ExcelToDbScript(IConfiguration config)
         string template;
 
         using (var sr =
-            new StreamReader(
-                Path.Combine(Directory.GetCurrentDirectory(), "Templates","ExcelToDb","Enum.mustache"),
-                Encoding.UTF8))
+               new StreamReader(
+                   Path.Combine(Directory.GetCurrentDirectory(), "Templates", "ExcelToDb", "Enum.mustache"),
+                   Encoding.UTF8))
         {
             template = await sr.ReadToEndAsync();
         }
@@ -124,25 +124,25 @@ public class ExcelToDbScript(IConfiguration config)
         string createTemplate;
 
         using (var sr =
-            new StreamReader(
-                Path.Combine(Directory.GetCurrentDirectory(), "Templates", "ExcelToDb", "Entity.mustache"),
-                Encoding.UTF8))
+               new StreamReader(
+                   Path.Combine(Directory.GetCurrentDirectory(), "Templates", "ExcelToDb", "Entity.mustache"),
+                   Encoding.UTF8))
         {
             template = await sr.ReadToEndAsync();
         }
 
         using (var sr =
-            new StreamReader(
-                Path.Combine(Directory.GetCurrentDirectory(), "Templates", "ExcelToDb", "Entity_Update.mustache"),
-                Encoding.UTF8))
+               new StreamReader(
+                   Path.Combine(Directory.GetCurrentDirectory(), "Templates", "ExcelToDb", "Entity_Update.mustache"),
+                   Encoding.UTF8))
         {
             updateTemplate = await sr.ReadToEndAsync();
         }
 
         using (var sr =
-            new StreamReader(
-                Path.Combine(Directory.GetCurrentDirectory(), "Templates", "ExcelToDb", "Entity_Create.mustache"),
-                Encoding.UTF8))
+               new StreamReader(
+                   Path.Combine(Directory.GetCurrentDirectory(), "Templates", "ExcelToDb", "Entity_Create.mustache"),
+                   Encoding.UTF8))
         {
             createTemplate = await sr.ReadToEndAsync();
         }
@@ -174,9 +174,9 @@ public class ExcelToDbScript(IConfiguration config)
         string template;
 
         using (var sr =
-            new StreamReader(
-                Path.Combine(Directory.GetCurrentDirectory(), "Templates", "ExcelToDb", "Dto.mustache"),
-                Encoding.UTF8))
+               new StreamReader(
+                   Path.Combine(Directory.GetCurrentDirectory(), "Templates", "ExcelToDb", "Dto.mustache"),
+                   Encoding.UTF8))
         {
             template = await sr.ReadToEndAsync();
         }
@@ -215,14 +215,28 @@ public class ExcelToDbScript(IConfiguration config)
         // Template name, output folder name, output file name
         List<Tuple<string, string, string>> taskList =
         [
-            Tuple.Create("GetByIdQuery", Path.Combine("Cqrs",pluralName,"Queries"), $"Get{name}ByIdQuery.cs"),
-            Tuple.Create("GetByConditionQuery", Path.Combine("Cqrs",pluralName,"Queries"), $"Get{name}ByConditionQuery.cs"),
-            Tuple.Create("CreateCommand", Path.Combine("Cqrs",pluralName,"Commands"), $"Create{name}Command.cs"),
-            Tuple.Create("UpdateCommand", Path.Combine("Cqrs",pluralName,"Commands"), $"Update{name}Command.cs"),
-            Tuple.Create("DeleteCommand", Path.Combine("Cqrs",pluralName,"Commands"), $"Delete{name}Command.cs"),
-            Tuple.Create("BaseCommand", Path.Combine("Cqrs","Validation", pluralName), $"I{name}Command.cs"),
-            Tuple.Create("Validation", Path.Combine("Cqrs","Validation", pluralName), $"{name}Validator.cs"),
-            Tuple.Create("SearchParam", Path.Combine("Cqrs", pluralName), $"Search{name}Param.cs")
+            // Commands
+            Tuple.Create("BaseCommand", Path.Combine("Cqrs", pluralName, "Commands"), $"{name}BaseCommand.cs"),
+            Tuple.Create("CreateCommand", Path.Combine("Cqrs", pluralName, "Commands"), $"Create{name}Command.cs"),
+            Tuple.Create("UpdateCommand", Path.Combine("Cqrs", pluralName, "Commands"), $"Update{name}Command.cs"),
+            Tuple.Create("DeleteCommand", Path.Combine("Cqrs", pluralName, "Commands"), $"Delete{name}Command.cs"),
+            // Queries
+            Tuple.Create("GetByIdQuery", Path.Combine("Cqrs", pluralName, "Queries"), $"Get{name}ByIdQuery.cs"),
+            Tuple.Create("GetByConditionQuery", Path.Combine("Cqrs", pluralName, "Queries"),
+                $"Get{name}ByConditionQuery.cs"),
+            // Specs
+            Tuple.Create("GetByConditionSpec", Path.Combine("Cqrs", pluralName, "Specs"), $"{name}ByConditionSpec.cs"),
+            Tuple.Create("GetByIdSpec", Path.Combine("Cqrs", pluralName, "Specs"), $"{name}ByIdSpec.cs"),
+            // Validators
+            Tuple.Create("ValidatorBase", Path.Combine("Cqrs", pluralName, "Validators"), $"{name}ValidatorBase.cs"),
+            Tuple.Create("CreateValidator", Path.Combine("Cqrs", pluralName, "Validators"),
+                $"Create{name}CommandValidator.cs"),
+            Tuple.Create("DeleteValidator", Path.Combine("Cqrs", pluralName, "Validators"),
+                $"Delete{name}CommandValidator.cs"),
+            Tuple.Create("UpdateValidator", Path.Combine("Cqrs", pluralName, "Validators"),
+                $"Update{name}CommandValidator.cs"),
+            // Params
+            Tuple.Create("SearchParam", Path.Combine("Cqrs", pluralName, "Params"), $"Search{name}Param.cs")
         ];
 
         var stubble = new StubbleBuilder().Build();
@@ -232,9 +246,10 @@ public class ExcelToDbScript(IConfiguration config)
             string template;
 
             using (var sr =
-                new StreamReader(
-                    Path.Combine(Directory.GetCurrentDirectory(), "Templates", "ExcelToDb", $"{task.Item1}.mustache"),
-                    Encoding.UTF8))
+                   new StreamReader(
+                       Path.Combine(Directory.GetCurrentDirectory(), "Templates", "ExcelToDb",
+                           $"{task.Item1}.mustache"),
+                       Encoding.UTF8))
             {
                 template = await sr.ReadToEndAsync();
             }
@@ -257,9 +272,9 @@ public class ExcelToDbScript(IConfiguration config)
         string template;
 
         using (var sr =
-            new StreamReader(
-                Path.Combine(Directory.GetCurrentDirectory(), "Templates", "ExcelToDb", "Controller.mustache"),
-                Encoding.UTF8))
+               new StreamReader(
+                   Path.Combine(Directory.GetCurrentDirectory(), "Templates", "ExcelToDb", "Controller.mustache"),
+                   Encoding.UTF8))
         {
             template = await sr.ReadToEndAsync();
         }
@@ -290,23 +305,23 @@ public class ExcelToDbScript(IConfiguration config)
         var view = new
         {
             Entity = objDict,
-            // IdType = config["Generated:Entity:IdType"],
             EntityNamespace = config["Generated:Entity:Namespace"],
-            // DtoNamespace = config["Generated:Dto:Namespace"],
             CqrsNamespace = config["Generated:Cqrs:Namespace"],
-            // ValidationNamespace = config["Generated:Validation:Namespace"],
-            // ParamNamespace = config["Generated:Param:Namespace"],
+            ValidationNamespace = config["Generated:Validation:Namespace"],
             TestNamespace = config["Generated:Test:Namespace"]
         };
 
         // Template name, output folder name, output file name
         List<Tuple<string, string, string>> taskList =
         [
-            Tuple.Create("GetByIdQuery", Path.Combine("Test", "Cqrs", pluralName, "Queries"), $"Get{name}ByIdQueryTest.cs"),
-            // Tuple.Create("GetByConditionQuery", "Test", "Cqrs", pluralName, "Queries", $"Get{name}ByConditionQueryTest.cs"),
-            Tuple.Create("CreateCommand",Path.Combine("Test", "Cqrs", pluralName, "Commands"), $"Create{name}CommandTest.cs"),
-            Tuple.Create("UpdateCommand",Path.Combine("Test", "Cqrs", pluralName, "Commands"), $"Update{name}CommandTest.cs"),
-            Tuple.Create("DeleteCommand",Path.Combine("Test", "Cqrs", pluralName, "Commands"), $"Delete{name}CommandTest.cs"),
+            Tuple.Create("GetByIdQuery", Path.Combine("Test", "Cqrs", pluralName, "Queries"),
+                $"Get{name}ByIdQueryTest.cs"),
+            Tuple.Create("CreateCommand", Path.Combine("Test", "Cqrs", pluralName, "Commands"),
+                $"Create{name}CommandTest.cs"),
+            Tuple.Create("UpdateCommand", Path.Combine("Test", "Cqrs", pluralName, "Commands"),
+                $"Update{name}CommandTest.cs"),
+            Tuple.Create("DeleteCommand", Path.Combine("Test", "Cqrs", pluralName, "Commands"),
+                $"Delete{name}CommandTest.cs"),
             Tuple.Create("Builder", Path.Combine("Test", "Cqrs", pluralName, "Builders"), $"{name}Builder.cs")
         ];
 
@@ -316,10 +331,9 @@ public class ExcelToDbScript(IConfiguration config)
         {
             string template;
 
-            using (var sr =
-                new StreamReader(
-                    Path.Combine(Directory.GetCurrentDirectory(), "Templates", "ExcelToDb", "Tests", $"{task.Item1}.mustache"),
-                    Encoding.UTF8))
+            using (var sr = new StreamReader(
+                       Path.Combine(Directory.GetCurrentDirectory(), "Templates", "ExcelToDb", "Tests",
+                           $"{task.Item1}.mustache"), Encoding.UTF8))
             {
                 template = await sr.ReadToEndAsync();
             }

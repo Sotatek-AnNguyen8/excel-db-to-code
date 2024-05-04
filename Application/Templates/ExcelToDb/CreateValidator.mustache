@@ -1,0 +1,10 @@
+﻿using {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
+
+namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Validators;
+
+public class Create{{Name}}Validator : {{Name}}ValidatorBase<Create{{Name}}Command>
+{
+    public Create{{Name}}Validator(IReadRepository<{{Name}}> {{VarName}}Repository)
+    {
+    }
+}

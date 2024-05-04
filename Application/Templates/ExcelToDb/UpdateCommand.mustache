@@ -2,10 +2,8 @@ using Application.Common.Exceptions;
 using Application.Common.Repositories;
 using Application.Common.Responses;
 using Application.Common.UnitOfWork;
-using {{ValidationNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}};
 using Domain.Common;
 using {{EntityNamespace}};
-using FluentValidation;
 using MediatR;
 using Newtonsoft.Json;
 using Shared.Constants;
@@ -13,14 +11,10 @@ using Shared.Constants;
 namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
 
 {{#Entity}}
-public class Update{{Name}}Command : IRequest<ResponseBase<{{Name}}>>, I{{Name}}Command
+public class Update{{Name}}Command : {{Name}}BaseCommand, IRequest<ResponseBase<{{Name}}>>
 {
     [JsonIgnore]
     public {{IdType}} Id { get; private set; }
-
-{{#EntityFields}}
-    public {{Type}}{{^IsRequired}}?{{/IsRequired}} {{Name}} { get; set; }{{#HasDefaultValue}} = {{DefaultValue}};{{/HasDefaultValue}}
-{{/EntityFields}}
 
     public Update{{Name}}Command SetId({{IdType}} id)
     {
@@ -29,18 +23,8 @@ public class Update{{Name}}Command : IRequest<ResponseBase<{{Name}}>>, I{{Name}}
     }
 }
 
-public class Update{{Name}}CommandValidator : AbstractValidator<Update{{Name}}Command>
-{
-    public Update{{Name}}CommandValidator()
-    {
-        RuleFor(p => p.Id)
-            .GreaterThan(0)
-            .NotEmpty();
-        {{Name}}Validator.ApplyRules(this);
-    }
-}
-
-public class Update{{Name}}CommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<Update{{Name}}Command, ResponseBase<{{Name}}>>
+public class Update{{Name}}CommandHandler(IUnitOfWork unitOfWork)
+    : IRequestHandler<Update{{Name}}Command, ResponseBase<{{Name}}>>
 {
     private readonly IWriteRepository<{{Name}}> _{{VarName}}Repository = unitOfWork.GetRepository<{{Name}}>();
 

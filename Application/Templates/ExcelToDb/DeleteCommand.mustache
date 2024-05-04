@@ -1,32 +1,17 @@
-using Application.Common.Responses;
+using Application.Catalog.Common.Commands;
 using Application.Common.Repositories;
+using Application.Common.Responses;
 using Application.Common.UnitOfWork;
 using {{EntityNamespace}};
-using FluentValidation;
 using MediatR;
 using Shared.Constants;
 
 namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
 
 {{#Entity}}
-public class Delete{{Name}}Command : IRequest<ResponseBase<IEnumerable<{{IdType}}>>>
-{
-    public List<{{IdType}}> Ids { get; init; } = [];
-}
+public class Delete{{Name}}Command : DeleteBaseCommand<{{IdType}}>;
 
-public class Delete{{Name}}CommandValidator : AbstractValidator<Delete{{Name}}Command>
-{
-    public Delete{{Name}}CommandValidator()
-    {
-        RuleFor(c => c.Ids)
-            .NotEmpty();
-        RuleForEach(c => c.Ids)
-            .GreaterThan(0)
-            .NotEmpty();
-    }
-}
-
-public class Delete{{Name}}CommandHandler(IUnitOfWork unitOfWork) 
+public class Delete{{Name}}CommandHandler(IUnitOfWork unitOfWork)
     : IRequestHandler<Delete{{Name}}Command, ResponseBase<IEnumerable<{{IdType}}>>>
 {
     private readonly IWriteRepository<{{Name}}> _{{VarName}}Repository = unitOfWork.GetRepository<{{Name}}>();

@@ -1,30 +1,15 @@
 using Application.Common.Repositories;
 using Application.Common.Responses;
 using Application.Common.UnitOfWork;
-using {{ValidationNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}};
 using Domain.Common;
 using {{EntityNamespace}};
-using FluentValidation;
 using MediatR;
 using Shared.Constants;
 
 namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
 
 {{#Entity}}
-public class Create{{Name}}Command : IRequest<ResponseBase<{{Name}}>>, I{{Name}}Command
-{
-{{#EntityFields}}
-    public {{Type}}{{^IsRequired}}?{{/IsRequired}} {{Name}} { get; set; }{{#HasDefaultValue}} = {{DefaultValue}};{{/HasDefaultValue}}
-{{/EntityFields}}
-}
-
-public class Create{{Name}}CommandValidator : AbstractValidator<Create{{Name}}Command>
-{
-    public Create{{Name}}CommandValidator()
-    {
-        {{Name}}Validator.ApplyRules(this);
-    }
-}
+public class Create{{Name}}Command : {{Name}}BaseCommand, IRequest<ResponseBase<{{Name}}>>;
 
 public class Create{{Name}}CommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<Create{{Name}}Command, ResponseBase<{{Name}}>>
 {

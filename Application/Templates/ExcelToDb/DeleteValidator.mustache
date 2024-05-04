@@ -1,0 +1,6 @@
+﻿using {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
+using {{ValidationNamespace}};
+
+namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Validators;
+
+public class Delete{{Name}}Validator : DeleteValidator<Delete{{Name}}Command, {{IdType}}>;

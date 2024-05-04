@@ -1,11 +1,9 @@
-﻿using Domain.Common;
-
-namespace {{ValidationNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}};
+﻿namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
 
 {{#Entity}}
-public interface I{{Name}}Command
+public class {{Name}}BaseCommand
 {
 {{#EntityFields}}
-    {{Type}}{{^IsRequired}}?{{/IsRequired}} {{Name}} { get; set; }
+    public {{Type}}{{^IsRequired}}?{{/IsRequired}} {{Name}} { get; set; }{{#HasDefaultValue}} = {{DefaultValue}};{{/HasDefaultValue}}
 {{/EntityFields}}
 }{{/Entity}}

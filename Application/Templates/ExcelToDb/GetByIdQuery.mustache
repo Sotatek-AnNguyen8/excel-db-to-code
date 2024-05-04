@@ -1,9 +1,9 @@
+using {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Specs;
 using Application.Common.Exceptions;
 using Application.Common.Persistence;
 using Application.Common.Responses;
 using {{DtoNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}};
 using {{EntityNamespace}};
-using Mapster;
 using MediatR;
 using Shared.Constants;
 
@@ -15,15 +15,16 @@ public class Get{{Name}}ByIdQuery : IRequest<ResponseBase<{{Name}}Dto>>
     public {{IdType}} Id { get; init; }
 }
 
-public class Get{{Name}}ByIdQueryHandler(IReadRepository<{{Name}}> {{VarName}}Repository) : IRequestHandler<Get{{Name}}ByIdQuery, ResponseBase<{{Name}}Dto>>
+public class Get{{Name}}ByIdQueryHandler(IReadRepository<{{Name}}> {{VarName}}Repository)
+    : IRequestHandler<Get{{Name}}ByIdQuery, ResponseBase<{{Name}}Dto>>
 {
     public async Task<ResponseBase<{{Name}}Dto>> Handle(Get{{Name}}ByIdQuery request, CancellationToken cancellationToken)
     {
+        var spec = new {{Name}}ByIdSpec(request.Id);
         var {{VarName}} =
-            await {{VarName}}Repository.GetByIdAsync(request.Id, cancellationToken)
+            await {{VarName}}Repository.FirstOrDefaultAsync(spec, cancellationToken)
             ?? throw new NotFoundException(MessageCommon.SetEntityNotFound(nameof({{Name}}), request.Id));
-        var {{VarName}}Dto = {{VarName}}.Adapt<{{Name}}Dto>();
 
-        return new ResponseBase<{{Name}}Dto>({{VarName}}Dto);
+        return new ResponseBase<{{Name}}Dto>({{VarName}});
     }
 }{{/Entity}}

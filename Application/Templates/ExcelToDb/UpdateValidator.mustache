@@ -1,0 +1,13 @@
+﻿using {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
+using FluentValidation;
+
+namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Validators;
+
+public class Update{{Name}}Validator : {{Name}}ValidatorBase<Update{{Name}}Command>
+{
+    public Update{{Name}}Validator(IReadRepository<{{Name}}> {{VarName}}Repository)
+    {
+        RuleFor(x => x.Id)
+            .NotEmpty();
+    }
+}

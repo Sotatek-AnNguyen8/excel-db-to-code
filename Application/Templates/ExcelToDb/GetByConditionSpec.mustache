@@ -1,0 +1,17 @@
+using {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Queries;
+using Application.Common.Specification;
+using {{DtoNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}};
+using Ardalis.Specification;
+using {{EntityNamespace}};
+
+namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Specs;
+
+{{#Entity}}
+public sealed class {{Name}}ByConditionSpec : EntitiesByPaginationFilterSpec<{{Name}}, {{Name}}Dto>,
+    ISingleResultSpecification<{{Name}}>
+{
+    public {{Name}}ByConditionSpec(Get{{Name}}ByConditionQuery request) : base(request)
+    {
+{{{ParamValidation}}}
+    }
+}{{/Entity}}
