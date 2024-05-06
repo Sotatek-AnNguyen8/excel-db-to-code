@@ -1,0 +1,41 @@
+using Application.Common.Export;
+using Application.Common.Export.MapperRules;
+using Application.Common.Interfaces;
+using Application.Common.Models;
+using Application.Common.Persistence;
+using Application.Common.Specification;
+using {{ParamNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}};
+using Ardalis.Specification;
+using {{EntityNamespace}};
+using MediatR;
+
+namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
+
+{{#Entity}}
+public class Export{{Name}}Command : BaseExportCommand<ExportResult, Search{{Name}}Param>;
+
+public class Export{{Name}}CommandHandler(
+    IReadRepository<{{Name}}> {{VarName}}Repository,
+    ISpreadsheetExporter<{{Name}}> exporter)
+    : IRequestHandler<Export{{Name}}Command, ExportResult>
+{
+    public async Task<ExportResult> Handle(Export{{Name}}Command request, CancellationToken cancellationToken)
+    {
+        var spec = new Export{{Name}}Spec(request.Query);
+
+        var options = new ExportListOptions<{{Name}}>
+        {
+            Fields = request.Fields
+        };
+
+        var {{VarNamePlural}} = await {{VarName}}Repository.ListAsync(spec, cancellationToken);
+
+        exporter.Init(
+            request.SelectedIds == null ? {{VarNamePlural}} : {{VarNamePlural}}.Where(b => request.SelectedIds.Contains(b.Id)).ToList(),
+            options);
+
+        var fs = exporter.ExportToMemoryStream();
+
+        return ExportResult.Spreadsheet(fs, options.FileName);
+    }
+}{{/Entity}}

@@ -148,6 +148,7 @@ public class ExcelDbObject
                     .FirstOrDefault()!
             },
             { "VarName", Name.ToVariableCase() },
+            { "VarNamePlural", Name.Pluralize().ToVariableCase() },
             { "NamePlural", Name.Pluralize() },
             { "NamePluralHumanize", OriginName.Pluralize().Humanize(LetterCasing.LowerCase) },
             { "NameSingularHumanize", OriginName.Humanize(LetterCasing.LowerCase) },

@@ -1,0 +1,21 @@
+using {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Queries;
+using Application.Common.Specification;
+using {{DtoNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}};
+using Ardalis.Specification;
+using {{EntityNamespace}};
+
+namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Specs;
+
+{{#Entity}}
+public sealed class Export{{Name}}CommandSpec : EntitiesByBaseFilterSpec<{{Name}}>
+{
+    public Export{{Name}}CommandSpec(Search{{Name}}Param request) : base(request)
+    {
+{{{ParamValidation}}}
+
+        if (!request.HasOrderBy() && typeof({{Name}}).GetProperty("CreatedOn") != null)
+        {
+            Spec.OrderBy(["CreatedOn desc"]);
+        }
+    }
+}{{/Entity}}

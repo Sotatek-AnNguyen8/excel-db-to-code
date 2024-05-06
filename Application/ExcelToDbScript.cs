@@ -36,6 +36,8 @@ public class ExcelToDbScript(IConfiguration config)
                     AnsiConsole.MarkupLine($"Generated {sheetName}");
                 }
             });
+        
+        AnsiConsole.MarkupLine($"\nSee result in {_pathGeneration}");
     }
 
     private List<string> SelectSheets()
@@ -220,6 +222,7 @@ public class ExcelToDbScript(IConfiguration config)
             Tuple.Create("CreateCommand", Path.Combine("Cqrs", pluralName, "Commands"), $"Create{name}Command.cs"),
             Tuple.Create("UpdateCommand", Path.Combine("Cqrs", pluralName, "Commands"), $"Update{name}Command.cs"),
             Tuple.Create("DeleteCommand", Path.Combine("Cqrs", pluralName, "Commands"), $"Delete{name}Command.cs"),
+            Tuple.Create("ExportCommand", Path.Combine("Cqrs", pluralName, "Commands"), $"Export{name}Command.cs"),
             // Queries
             Tuple.Create("GetByIdQuery", Path.Combine("Cqrs", pluralName, "Queries"), $"Get{name}ByIdQuery.cs"),
             Tuple.Create("GetByConditionQuery", Path.Combine("Cqrs", pluralName, "Queries"),
@@ -227,6 +230,7 @@ public class ExcelToDbScript(IConfiguration config)
             // Specs
             Tuple.Create("GetByConditionSpec", Path.Combine("Cqrs", pluralName, "Specs"), $"{name}ByConditionSpec.cs"),
             Tuple.Create("GetByIdSpec", Path.Combine("Cqrs", pluralName, "Specs"), $"{name}ByIdSpec.cs"),
+            Tuple.Create("ExportCommandSpec", Path.Combine("Cqrs", pluralName, "Specs"), $"Export{name}CommandSpec.cs"),
             // Validators
             Tuple.Create("ValidatorBase", Path.Combine("Cqrs", pluralName, "Validators"), $"{name}ValidatorBase.cs"),
             Tuple.Create("CreateValidator", Path.Combine("Cqrs", pluralName, "Validators"),
