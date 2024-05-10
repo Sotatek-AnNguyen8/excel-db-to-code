@@ -1,18 +1,17 @@
+using Application.Catalog.{{#Entity}}{{NamePlural}}{{/Entity}}.Specs;
 using Application.Common.Export;
 using Application.Common.Export.MapperRules;
 using Application.Common.Interfaces;
 using Application.Common.Models;
 using Application.Common.Persistence;
-using Application.Common.Specification;
 using {{ParamNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}};
-using Ardalis.Specification;
 using {{EntityNamespace}};
 using MediatR;
 
 namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
 
 {{#Entity}}
-public class Export{{Name}}Command : BaseExportCommand<ExportResult, Search{{Name}}Param>;
+public class Export{{Name}}Command : BaseExportCommand<Search{{Name}}Param>;
 
 public class Export{{Name}}CommandHandler(
     IReadRepository<{{Name}}> {{VarName}}Repository,
@@ -21,7 +20,7 @@ public class Export{{Name}}CommandHandler(
 {
     public async Task<ExportResult> Handle(Export{{Name}}Command request, CancellationToken cancellationToken)
     {
-        var spec = new Export{{Name}}Spec(request.Query);
+        var spec = new Export{{Name}}Spec(request);
 
         var options = new ExportListOptions<{{Name}}>
         {
@@ -30,10 +29,7 @@ public class Export{{Name}}CommandHandler(
 
         var {{VarNamePlural}} = await {{VarName}}Repository.ListAsync(spec, cancellationToken);
 
-        exporter.Init(
-            request.SelectedIds == null ? {{VarNamePlural}} : {{VarNamePlural}}.Where(b => request.SelectedIds.Contains(b.Id)).ToList(),
-            options);
-
+        exporter.Init({{VarNamePlural}}, options);
         var fs = exporter.ExportToMemoryStream();
 
         return ExportResult.Spreadsheet(fs, options.FileName);

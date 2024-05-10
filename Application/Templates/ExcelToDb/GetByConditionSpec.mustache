@@ -7,10 +7,10 @@ using {{EntityNamespace}};
 namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Specs;
 
 {{#Entity}}
-public sealed class {{Name}}ByConditionSpec : EntitiesByPaginationFilterSpec<{{Name}}, {{Name}}Dto>,
-    ISingleResultSpecification<{{Name}}>
+public sealed class {{Name}}ByConditionSpec : BaseSpec<{{Name}}, {{Name}}Dto>, ISingleResultSpecification<{{Name}}>
 {
-    public {{Name}}ByConditionSpec(Get{{Name}}ByConditionQuery request) : base(request)
+    public {{Name}}ByConditionSpec(Search{{Name}}Param request, bool? useDefaultOrderBy = null)
+        : base(request, useDefaultOrderBy: useDefaultOrderBy)
     {
 {{{ParamValidation}}}
     }

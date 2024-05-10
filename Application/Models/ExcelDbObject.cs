@@ -93,7 +93,7 @@ public class ExcelDbObject
                         {
                             "DefaultValue",
                             f.DefaultValue is string
-                                ? string.IsNullOrEmpty(f.DefaultValue) ? "string.Empty" : $"\"{f.DefaultValue}\""
+                                ? string.IsNullOrWhiteSpace(f.DefaultValue) ? "string.Empty" : $"\"{f.DefaultValue}\""
                                 : f.DefaultValue
                         },
                         { "Type", GetType(f) },
@@ -119,7 +119,7 @@ public class ExcelDbObject
                         {
                             "DefaultValue",
                             f.DefaultValue is string
-                                ? string.IsNullOrEmpty(f.DefaultValue) ? "string.Empty" : $"\"{f.DefaultValue}\""
+                                ? string.IsNullOrWhiteSpace(f.DefaultValue) ? "string.Empty" : $"\"{f.DefaultValue}\""
                                 : f.DefaultValue
                         },
                         { "Type", GetType(f) },
@@ -486,7 +486,7 @@ public class ExcelDbObject
         if (field.Type == ExcelDbEntityFieldType.Varchar)
         {
             return
-                $".Where({varAbbr} => string.IsNullOrEmpty(request.{field.Name}) || {varAbbr}.{field.Name}.ToLower().Contains(request.{field.Name}.ToLower()))";
+                $".Where({varAbbr} => string.IsNullOrWhiteSpace(request.{field.Name}) || {varAbbr}.{field.Name}.ToLower().Contains(request.{field.Name}.ToLower()))";
         }
 
         return
