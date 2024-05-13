@@ -37,6 +37,14 @@ public class {{Name}}Controller : VersionedApiController
         return Ok(result);
     }
 
+    [HttpPost("export")]
+    [OpenApiOperation("Export {{NamePluralHumanize}}", "")]
+    public async Task<IActionResult> Export(Export{{Name}}Command request)
+    {
+        var result = await Mediator.Send(request);
+        return File(result.Stream, result.FileType, result.FileName);
+    }
+
     [HttpPost("search")]
     [OpenApiOperation("Get {{NamePluralHumanize}} by conditions", "")]
     public async Task<IActionResult> GetAsync(Get{{Name}}ByConditionQuery request)

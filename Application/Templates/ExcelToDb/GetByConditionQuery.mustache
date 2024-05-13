@@ -1,11 +1,10 @@
-using {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Specs;
 using Application.Common.Models;
 using Application.Common.Persistence;
 using Application.Common.Responses;
 using {{DtoNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}};
-using {{ParamNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}};
+using {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Params;
+using {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Specs;
 using Application.Services;
-using Domain.Common;
 using {{EntityNamespace}};
 using MediatR;
 
@@ -23,7 +22,12 @@ public class Get{{Name}}ByConditionQueryHandler(
         Get{{Name}}ByConditionQuery request, CancellationToken cancellationToken)
     {
         var spec = new {{Name}}ByConditionSpec(request);
-        var {{VarName}} = await paginationService.PaginatedListAsync({{VarName}}Repository, spec, request.PageNumber, request.PageSize, cancellationToken);
+        var {{VarName}} = await paginationService.PaginatedListAsync(
+            {{VarName}}Repository,
+            spec,
+            request.PageNumber,
+            request.PageSize,
+            cancellationToken);
         return new ResponseBase<PaginationResponse<{{Name}}Dto>>({{VarName}});
     }
 }{{/Entity}}

@@ -1,9 +1,10 @@
-using Application.Catalog.{{#Entity}}{{NamePlural}}{{/Entity}}.Specs;
+using Application.Common.Models;
 using Application.Common.Export;
-using Application.Common.Export.MapperRules;
 using Application.Common.Interfaces;
 using Application.Common.Models;
 using Application.Common.Persistence;
+using {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Params;
+using {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Specs;
 using {{ParamNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}};
 using {{EntityNamespace}};
 using MediatR;

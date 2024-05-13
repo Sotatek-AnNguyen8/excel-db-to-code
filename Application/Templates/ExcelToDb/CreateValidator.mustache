@@ -1,10 +1,13 @@
-﻿using {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
+﻿using Application.Common.Persistence;
+using {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
+using {{EntityNamespace}};
 
 namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Validators;
 
+{{#Entity}}
 public class Create{{Name}}Validator : {{Name}}ValidatorBase<Create{{Name}}Command>
 {
     public Create{{Name}}Validator(IReadRepository<{{Name}}> {{VarName}}Repository)
     {
     }
-}
+}{{/Entity}}

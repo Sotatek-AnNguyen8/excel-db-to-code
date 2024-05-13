@@ -1,8 +1,11 @@
-﻿using {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
+﻿using Application.Common.Persistence;
+using {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
+using {{EntityNamespace}};
 using FluentValidation;
 
 namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Validators;
 
+{{#Entity}}
 public class Update{{Name}}Validator : {{Name}}ValidatorBase<Update{{Name}}Command>
 {
     public Update{{Name}}Validator(IReadRepository<{{Name}}> {{VarName}}Repository)
@@ -10,4 +13,4 @@ public class Update{{Name}}Validator : {{Name}}ValidatorBase<Update{{Name}}Comma
         RuleFor(x => x.Id)
             .NotEmpty();
     }
-}
+}{{/Entity}}

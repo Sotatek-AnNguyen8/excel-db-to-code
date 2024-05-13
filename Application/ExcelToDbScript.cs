@@ -310,6 +310,7 @@ public class ExcelToDbScript(IConfiguration config)
         {
             Entity = objDict,
             EntityNamespace = config["Generated:Entity:Namespace"],
+            DtoNamespace = config["Generated:Dto:Namespace"],
             CqrsNamespace = config["Generated:Cqrs:Namespace"],
             ValidationNamespace = config["Generated:Validation:Namespace"],
             TestNamespace = config["Generated:Test:Namespace"]

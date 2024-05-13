@@ -1,7 +1,6 @@
 using Application.Common.Repositories;
 using Application.Common.Responses;
 using Application.Common.UnitOfWork;
-using Domain.Common;
 using {{EntityNamespace}};
 using MediatR;
 using Shared.Constants;
@@ -11,7 +10,8 @@ namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
 {{#Entity}}
 public class Create{{Name}}Command : {{Name}}BaseCommand, IRequest<ResponseBase<{{Name}}>>;
 
-public class Create{{Name}}CommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<Create{{Name}}Command, ResponseBase<{{Name}}>>
+public class Create{{Name}}CommandHandler(IUnitOfWork unitOfWork)
+    : IRequestHandler<Create{{Name}}Command, ResponseBase<{{Name}}>>
 {
     private readonly IWriteRepository<{{Name}}> _{{VarName}}Repository = unitOfWork.GetRepository<{{Name}}>();
 

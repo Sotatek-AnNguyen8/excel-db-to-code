@@ -2,6 +2,9 @@
 using Application.Common.Validation;
 using FluentValidation;
 
+namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Validators;
+
+{{#Entity}}
 public class {{Name}}ValidatorBase<TCommand> : CustomValidator<TCommand> where TCommand : {{Name}}BaseCommand
 {
     protected {{Name}}ValidatorBase()
@@ -15,4 +18,4 @@ public class {{Name}}ValidatorBase<TCommand> : CustomValidator<TCommand> where T
 {{{Validation}}}
 {{/EntityFields}}
     }
-}
+}{{/Entity}}

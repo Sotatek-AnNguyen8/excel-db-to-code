@@ -8,4 +8,4 @@ namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Specs;
 
 {{#Entity}}
 public sealed class Export{{Name}}Spec(Export{{Name}}Command command)
-    : BaseExportSpec<{{Name}}, Search{{Name}}Param>(command, new {{Name}}ByConditionSpec(command.Query), false));
+    : BaseExportSpec<{{Name}}, Search{{Name}}Param>(command, new {{Name}}ByConditionSpec(command.Query, false));{{/Entity}}

@@ -3,4 +3,5 @@ using {{ValidationNamespace}};
 
 namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Validators;
 
-public class Delete{{Name}}Validator : DeleteValidator<Delete{{Name}}Command, {{IdType}}>;
+{{#Entity}}
+public class Delete{{Name}}Validator : DeleteValidator<Delete{{Name}}Command, {{IdType}}>;{{/Entity}}
