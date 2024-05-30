@@ -1,7 +1,7 @@
 ﻿namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Commands;
 
 {{#Entity}}
-public class {{Name}}BaseCommand
+public abstract class {{Name}}BaseCommand
 {
 {{#EntityFields}}
     public {{Type}}{{^IsRequired}}?{{/IsRequired}} {{Name}} { get; set; }{{#HasDefaultValue}} = {{DefaultValue}};{{/HasDefaultValue}}
