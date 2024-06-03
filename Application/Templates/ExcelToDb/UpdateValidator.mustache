@@ -6,9 +6,9 @@ using FluentValidation;
 namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Validators;
 
 {{#Entity}}
-public class Update{{Name}}Validator : {{Name}}ValidatorBase<Update{{Name}}Command>
+public class Update{{Name}}CommandValidator : {{Name}}ValidatorBase<Update{{Name}}Command>
 {
-    public Update{{Name}}Validator(IReadRepository<{{Name}}> {{VarName}}Repository)
+    public Update{{Name}}CommandValidator(IReadRepository<{{Name}}> {{VarName}}Repository)
     {
         RuleFor(x => x.Id)
             .NotEmpty();

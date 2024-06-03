@@ -5,9 +5,9 @@ using {{EntityNamespace}};
 namespace {{CqrsNamespace}}.{{#Entity}}{{NamePlural}}{{/Entity}}.Validators;
 
 {{#Entity}}
-public class Create{{Name}}Validator : {{Name}}ValidatorBase<Create{{Name}}Command>
+public class Create{{Name}}CommandValidator : {{Name}}ValidatorBase<Create{{Name}}Command>
 {
-    public Create{{Name}}Validator(IReadRepository<{{Name}}> {{VarName}}Repository)
+    public Create{{Name}}CommandValidator(IReadRepository<{{Name}}> {{VarName}}Repository)
     {
     }
 }{{/Entity}}
