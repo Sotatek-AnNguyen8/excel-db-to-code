@@ -48,7 +48,7 @@ Contributions to the Excel-db-to-code Generator are welcome! If you find any bug
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](https://github.com/Sotatek-AnNguyen8/excel-db-to-code/blob/master/LICENSE) file for details.
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/Sotatek-AnNguyen8/excel-db-to-code/blob/master/LICENSE) file for more details.
 
 ## Contact
 For any inquiries or support, please contact [an.nguyen8@sotatek.com](mailto:an.nguyen8@sotatek.com).
